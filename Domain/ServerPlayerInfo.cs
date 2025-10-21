@@ -14,8 +14,9 @@ internal class ServerPlayerInfo
     {
         < 100 => PlayerDistance.Close,
         < 400 => PlayerDistance.Medium,
-        < 2000 => PlayerDistance.Far,
-        _ => PlayerDistance.VeryFar
+        < 1200 => PlayerDistance.Far,
+        < 2400 => PlayerDistance.VeryFar,
+        _ => PlayerDistance.Distant
     };
 
     internal ServerPlayerInfo(string name, float distance, bool isPublic, bool isMe = false)

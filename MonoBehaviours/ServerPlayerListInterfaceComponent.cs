@@ -15,10 +15,8 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
 {
     private TMP_FontAsset _font;
     private Color _color;
-    private Color _outlineColor;
-    private float _outlineWidth;
 
-    private const float Pad = 5;
+    private const int Pad = 5;
 
     private bool _applyingFromConfig;
 
@@ -59,20 +57,20 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
         if (IsShowing != PluginConfig.ShowPlayers.Value.IsOn())
             ToggleHidden();
 
-        if (Time.time - lastRefresh >= 1f)
+        if (Time.time - lastRefresh >= PluginConfig.RefreshDelay.Value)
         {
             lastRefresh = Time.time;
 
             Refresh();
         }
+
+        LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)_background.transform);
     }
     private void GetSyles()
     {
         var text = EnemyHud.instance.m_baseHudPlayer.GetComponentInChildren<TMP_Text>();
         _font = text.font;
         _color = text.color;
-        _outlineColor = text.outlineColor;
-        _outlineWidth = text.outlineWidth;
     }
 
     private void ToggleHidden() => _container.gameObject.SetActive(!IsShowing);
@@ -178,7 +176,7 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
 
     private void SetListFromConfig()
     {
-        foreach(var element in _containerElements)
+        foreach (var element in _containerElements)
         {
             element.Name.fontSize = PluginConfig.ListFontSize.Value;
             element.Distance.fontSize = PluginConfig.ListFontSize.Value;
@@ -232,7 +230,7 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
 
         _mainRect.anchorMin = Vector2Extensions.Center;
         _mainRect.anchorMax = Vector2Extensions.Center;
-        _mainRect.pivot = Vector2Extensions.Center;
+        _mainRect.pivot = Vector2.up;
 
         var layout = gameObject.AddComponent<VerticalLayoutGroup>();
         layout.childControlWidth = true;
@@ -249,17 +247,15 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
     private void InitBackground()
     {
         var backgroundGameObject = new GameObject(GameObjectNames.ServerPlayerListBackground, typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter), typeof(Image));
-
-        var backgroundRect = (RectTransform)backgroundGameObject.transform;
-        backgroundRect.SetParent(transform, false);
-
-        backgroundRect.pivot = Vector2.up;
+        backgroundGameObject.transform.SetParent(transform, false);
 
         var layout = backgroundGameObject.GetComponent<VerticalLayoutGroup>();
         layout.childControlWidth = true;
         layout.childControlHeight = false;
         layout.childForceExpandWidth = true;
         layout.childForceExpandHeight = false;
+        layout.padding = new RectOffset(Pad, Pad, Pad, Pad);
+        layout.spacing = Pad;
 
         var fitter = backgroundGameObject.GetComponent<ContentSizeFitter>();
         fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
@@ -272,11 +268,7 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
     private void InitHeader()
     {
         var headerGameObject = new GameObject(GameObjectNames.ServerPlayerListHeader, typeof(RectTransform), typeof(ContentSizeFitter), typeof(TextMeshProUGUI));
-
-        var headerRect = (RectTransform)headerGameObject.transform;
-        headerRect.SetParent(_background.transform, false);
-
-        headerRect.pivot = Vector2Extensions.Center;
+        headerGameObject.transform.SetParent(_background.transform, false);
 
         var fitter = headerGameObject.GetComponent<ContentSizeFitter>();
         fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
@@ -287,7 +279,6 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
         _headerText.fontStyle = FontStyles.Bold;
         _headerText.textWrappingMode = TextWrappingModes.NoWrap;
         _headerText.alignment = TextAlignmentOptions.Top;
-        _headerText.margin = new Vector4(Pad, Pad, Pad, Pad);
 
         SetHeaderFromConfig();
     }
@@ -298,14 +289,12 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
         _container = containerGameObject.transform;
         _container.SetParent(_background.transform, false);
 
-        var headerRect = (RectTransform)_container;
-        headerRect.pivot = Vector2Extensions.Center;
-
         var layout = containerGameObject.GetComponent<VerticalLayoutGroup>();
         layout.childControlWidth = true;
         layout.childControlHeight = false;
         layout.childForceExpandWidth = true;
         layout.childForceExpandHeight = false;
+        layout.spacing = Pad;
 
         var fitter = containerGameObject.GetComponent<ContentSizeFitter>();
         fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
@@ -363,7 +352,6 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
         text.textWrappingMode = TextWrappingModes.NoWrap;
         text.overflowMode = TextOverflowModes.Ellipsis;
         text.alignment = TextAlignmentOptions.Left;
-        text.margin = new Vector4(Pad, 0, 0, Pad);
 
         text.fontSize = PluginConfig.ListFontSize.Value;
 
@@ -385,7 +373,6 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
         text.textWrappingMode = TextWrappingModes.NoWrap;
         text.overflowMode = TextOverflowModes.Ellipsis;
         text.alignment = TextAlignmentOptions.Right;
-        text.margin = new Vector4(0, 0, Pad, Pad);
 
         text.fontSize = PluginConfig.ListFontSize.Value;
 
@@ -395,7 +382,7 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
     private void DeleteElements(int number)
     {
         var listCount = _containerElements.Count;
-        for (var i = listCount - number; i < number; i++)
+        for (var i = listCount - number; i < listCount; i++)
         {
             DeleteElement(i);
         }

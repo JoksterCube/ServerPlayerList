@@ -1,6 +1,9 @@
-﻿using JoksterCube.ServerPlayerList.Domain;
+﻿using HarmonyLib;
+using JoksterCube.ServerPlayerList.Domain;
+using JoksterCube.ServerPlayerList.Settings;
 using TMPro;
 using UnityEngine;
+using static JoksterCube.ServerPlayerList.Settings.Constants;
 
 namespace JoksterCube.ServerPlayerList.MonoBehaviours;
 
@@ -23,15 +26,7 @@ internal class PlayerInfoElement : MonoBehaviour
         lastInfo = PlayerInfo;
     }
 
-    private Color DistanceColor() =>
-        PlayerInfo.DistancIndicator switch
-        {
-            PlayerDistance.Close => Color.green,
-            PlayerDistance.Medium => Color.yellow,
-            PlayerDistance.Far => Color.red,
-            PlayerDistance.VeryFar => Color.grey,
-            _ => Color.black,
-        };
+    private Color DistanceColor() => DistanceColors[PlayerInfo.DistancIndicator];
 
     private string FromatDistance()
     {

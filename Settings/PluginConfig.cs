@@ -13,6 +13,8 @@ internal static class PluginConfig
 
     internal static ConfigEntry<Toggle> ShowPlayers = null!;
 
+    internal static ConfigEntry<float> RefreshDelay = null!;
+
     internal static ConfigEntry<Vector2> AnchorPosition = null!;
     internal static ConfigEntry<float> Width = null!;
 
@@ -35,6 +37,8 @@ internal static class PluginConfig
         configSync.AddLockingConfigEntry(_serverConfigLocked);
 
         ShowPlayers = ConfigOptions.Config(General.ShowPlayers);
+
+        RefreshDelay = ConfigOptions.Config(General.RefreshDelay);
 
         AnchorPosition = ConfigOptions.Config(Appearance.AnchorPosition);
         Width = ConfigOptions.Config(Appearance.Width);

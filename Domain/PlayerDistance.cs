@@ -5,5 +5,6 @@ internal enum PlayerDistance
     Close,
     Medium,
     Far,
-    VeryFar
+    VeryFar,
+    Distant
 }
