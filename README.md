@@ -49,5 +49,5 @@ Report issues or suggest improvements via the mod’s Thunderstore page or GitHu
 ---
 
 **Author:** JoksterCube  
-**Version:** 1.0.0  
+**Version:** 1.0.3  
 **License:** MIT  

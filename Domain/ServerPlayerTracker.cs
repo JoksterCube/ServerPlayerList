@@ -11,7 +11,11 @@ internal static class ServerPlayerTracker
         _players.Count;
 
     internal static List<ServerPlayerInfo> GetCurrenlyOnlineList() =>
-        _players.Select(x => new ServerPlayerInfo(x)).OrderBy(x => x.Distance).ToList();
+        _players
+            .Select(x => new ServerPlayerInfo(x))
+            .OrderBy(x => x.Distance)
+            .ThenBy(x => x.Name)
+            .ToList();
 
     internal static void UpdatePlayerInfo()
     {

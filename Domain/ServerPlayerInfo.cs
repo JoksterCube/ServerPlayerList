@@ -29,7 +29,6 @@ internal class ServerPlayerInfo
 
     internal ServerPlayerInfo(ZNet.PlayerInfo info) : this(info.m_name.Trim(), GetDistance(info), IsPublicPosition(info), IsLocalPlayer(info)) { }
 
-
     private static bool IsLocalPlayer(ZNet.PlayerInfo info)
     {
         var me = Player.m_localPlayer;
