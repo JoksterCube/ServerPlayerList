@@ -21,7 +21,7 @@ With **Server Player List**, you get a small, unobtrusive panel showing the tota
 
 ### 📸 Screenshot
 
-![Screenshot](./Screenshots/screenshot.jpg)
+![Screenshot](https://raw.githubusercontent.com/JoksterCube/ServerPlayerList/refs/heads/main/Screenshots/screenshot.jpg)
 
 ---
 
