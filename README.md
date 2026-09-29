@@ -42,7 +42,7 @@ With **Server Player List**, you get a small, unobtrusive panel showing the tota
 
 #### RCON Player Filtering
 
-This feature supports [ValheimRcon by Tristan-dvr](https://github.com/Tristan-dvr/ValheimRcon) (`org.tristan.rcon`).
+This feature supports [ValheimRcon by Tristan-dvr](https://thunderstore.io/c/valheim/p/Tristan/ValheimRcon/) (`org.tristan.rcon`).
 
 On the server, enable `Ignore RCON user = On` in the `[1 - General]` section of ServerPlayerList's configuration. This setting is server-synced and defaults to `Off`.
 
