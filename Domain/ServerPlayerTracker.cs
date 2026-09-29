@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using JoksterCube.ServerPlayerList.Common;
+using JoksterCube.ServerPlayerList.Settings;
 
 namespace JoksterCube.ServerPlayerList.Domain;
 
@@ -21,6 +23,29 @@ internal static class ServerPlayerTracker
     {
         if (!ZNet.instance) return;
 
-        _players = ZNet.instance.GetPlayerList();
+        var rconName = PluginConfig.IgnoreRconUser.IsOn() ? Plugin.RconPlayerName.Value : string.Empty;
+        _players = ZNet.instance.GetPlayerList().ToList();
+        if (!string.IsNullOrEmpty(rconName))
+            RemovePlayer(rconName, requirePrivatePosition: true);
+
+        foreach (var entry in PluginConfig.IgnoredUsers.Value.Split(','))
+        {
+            var name = entry.Trim();
+            if (name.Length > 0)
+                RemovePlayer(name, requirePrivatePosition: false);
+        }
+    }
+
+    private static void RemovePlayer(string name, bool requirePrivatePosition)
+    {
+        var index = _players.FindIndex(player =>
+            player.m_name == name
+            && !player.m_publicPosition
+            && !new ServerPlayerInfo(player).IsMe);
+        if (index < 0 && !requirePrivatePosition)
+            index = _players.FindIndex(player => player.m_name == name);
+
+        if (index >= 0)
+            _players.RemoveAt(index);
     }
 }

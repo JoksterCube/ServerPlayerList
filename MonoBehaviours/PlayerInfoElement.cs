@@ -1,6 +1,6 @@
-﻿using HarmonyLib;
-using JoksterCube.ServerPlayerList.Domain;
+﻿using JoksterCube.ServerPlayerList.Domain;
 using JoksterCube.ServerPlayerList.Settings;
+using JoksterCube.ServerPlayerList.Common;
 using TMPro;
 using UnityEngine;
 using static JoksterCube.ServerPlayerList.Settings.Constants;
@@ -9,35 +9,47 @@ namespace JoksterCube.ServerPlayerList.MonoBehaviours;
 
 internal class PlayerInfoElement : MonoBehaviour
 {
-    internal ServerPlayerInfo PlayerInfo { get; set; }
-    internal TMP_Text Name { get; set; }
-    internal TMP_Text Distance { get; set; }
+    internal ServerPlayerInfo? PlayerInfo { get; set; }
+    internal TMP_Text Name { get; set; } = null!;
+    internal TMP_Text Distance { get; set; } = null!;
 
-    private ServerPlayerInfo lastInfo = null;
+    private ServerPlayerInfo? lastInfo;
+    private Toggle lastUseKilometers;
+    private string? lastLocalPlayerTag;
 
     private void Update()
     {
-        if (PlayerInfo == lastInfo) return;
+        var playerInfo = PlayerInfo;
+        var useKilometers = PluginConfig.UseKilometers.Value;
+        var localPlayerTag = PluginConfig.LocalPlayerTag.Value;
+        if (playerInfo is null || (playerInfo == lastInfo && useKilometers == lastUseKilometers && localPlayerTag == lastLocalPlayerTag)) return;
 
-        Name.text = PlayerInfo.Name;
-        Distance.color = DistanceColor();
-        Distance.text = FromatDistance();
+        Name.text = playerInfo.Name;
+        Distance.color = DistanceColor(playerInfo);
+        Distance.text = playerInfo.IsMe
+            ? localPlayerTag == "\u265b" && !Distance.font.HasCharacter('\u265b')
+                ? Distance.font.HasCharacter('\u2605') ? "\u2605" : "@"
+                : localPlayerTag
+            : FormatDistance(playerInfo);
 
-        lastInfo = PlayerInfo;
+        lastInfo = playerInfo;
+        lastUseKilometers = useKilometers;
+        lastLocalPlayerTag = localPlayerTag;
     }
 
-    private Color DistanceColor() => DistanceColors[PlayerInfo.DistancIndicator];
+    private static Color DistanceColor(ServerPlayerInfo playerInfo) => DistanceColors[playerInfo.DistancIndicator];
 
-    private string FromatDistance()
+    private static string FormatDistance(ServerPlayerInfo playerInfo)
     {
-        if (PlayerInfo.IsMe) return string.Empty;
-        if (!PlayerInfo.IsPublic) return "N/A";
+        if (!playerInfo.IsPublic) return "N/A";
+        if (PluginConfig.UseKilometers.IsOn() && playerInfo.Distance >= 1000)
+            return $"{playerInfo.Distance / 1000:F2} km";
 
-        return PlayerInfo.Distance switch
+        return playerInfo.Distance switch
         {
-            >= 100 => $"{PlayerInfo.Distance:F0}m",
-            >= 10 => $"{PlayerInfo.Distance:F1}m",
-            _ => $"{PlayerInfo.Distance:F2}m"
+            >= 100 => $"{playerInfo.Distance:F0} m",
+            >= 10 => $"{playerInfo.Distance:F1} m",
+            _ => $"{playerInfo.Distance:F2} m"
         };
     }
 }

@@ -13,19 +13,19 @@ namespace JoksterCube.ServerPlayerList.MonoBehaviours;
 
 internal class ServerPlayerListInterfaceComponent : DragNDrop
 {
-    private TMP_FontAsset _font;
+    private TMP_FontAsset _font = null!;
     private Color _color;
 
     private const int Pad = 5;
 
     private bool _applyingFromConfig;
 
-    private RectTransform _mainRect;
+    private RectTransform _mainRect = null!;
 
-    private Image _background;
+    private Image _background = null!;
 
-    private TMP_Text _headerText;
-    private Transform _container;
+    private TMP_Text _headerText = null!;
+    private Transform _container = null!;
     private readonly List<PlayerInfoElement> _containerElements = new();
 
     private float lastRefresh;

@@ -6,17 +6,17 @@ namespace JoksterCube.ServerPlayerList.Common;
 
 internal class DragNDrop : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDragHandler
 {
-    private RectTransform _target;
-    private RectTransform _clampWithin;
+    private RectTransform _target = null!;
+    private RectTransform? _clampWithin;
     private bool _shouldReturn;
 
-    private Canvas _rootCanvas;
+    private Canvas? _rootCanvas;
     private bool _isDragging;
     private Vector2 _dragOffset;
     private Vector2 _startAnchoredPosition;
 
-    public event Action<Vector2> OnPositionChanged;
-    public event Action<Vector2> OnDragEnded;
+    public event Action<Vector2>? OnPositionChanged;
+    public event Action<Vector2>? OnDragEnded;
 
     protected virtual void Awake()
     {

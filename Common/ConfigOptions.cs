@@ -8,8 +8,8 @@ namespace JoksterCube.ServerPlayerList.Common;
 
 internal static class ConfigOptions
 {
-    private static ConfigFile ConfigFile;
-    private static ConfigSync ConfigSync;
+    private static ConfigFile? ConfigFile;
+    private static ConfigSync? ConfigSync;
 
     internal static void Initialize(ConfigFile config, ConfigSync configSync)
     {
@@ -26,9 +26,9 @@ internal static class ConfigOptions
                 : " [Not Synced with Server]"),
             description.AcceptableValues, description.Tags);
 
-        ConfigEntry<T> configEntry = ConfigFile.Bind(group, name, value, extendedDescription);
+        ConfigEntry<T> configEntry = (ConfigFile ?? throw new InvalidOperationException("ConfigOptions is not initialized.")).Bind(group, name, value, extendedDescription);
 
-        SyncedConfigEntry<T> syncedConfigEntry = ConfigSync.AddConfigEntry(configEntry);
+        SyncedConfigEntry<T> syncedConfigEntry = (ConfigSync ?? throw new InvalidOperationException("ConfigOptions is not initialized.")).AddConfigEntry(configEntry);
         syncedConfigEntry.SynchronizedConfig = synchronizedSetting;
 
         return configEntry;

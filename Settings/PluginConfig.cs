@@ -13,6 +13,10 @@ internal static class PluginConfig
 
     internal static ConfigEntry<Toggle> ShowPlayers = null!;
 
+    internal static ConfigEntry<Toggle> IgnoreRconUser = null!;
+
+    internal static ConfigEntry<string> IgnoredUsers = null!;
+
     internal static ConfigEntry<float> RefreshDelay = null!;
 
     internal static ConfigEntry<Vector2> AnchorPosition = null!;
@@ -24,6 +28,9 @@ internal static class PluginConfig
 
     internal static ConfigEntry<int> HeaderFontSize = null!;
     internal static ConfigEntry<int> ListFontSize = null!;
+
+    internal static ConfigEntry<Toggle> UseKilometers = null!;
+    internal static ConfigEntry<string> LocalPlayerTag = null!;
 
     internal static ConfigEntry<string> HeaderText = null!;
 
@@ -38,6 +45,10 @@ internal static class PluginConfig
 
         ShowPlayers = ConfigOptions.Config(General.ShowPlayers);
 
+        IgnoreRconUser = ConfigOptions.Config(General.IgnoreRconUser);
+
+        IgnoredUsers = ConfigOptions.Config(General.IgnoredUsers);
+
         RefreshDelay = ConfigOptions.Config(General.RefreshDelay);
 
         AnchorPosition = ConfigOptions.Config(Appearance.AnchorPosition);
@@ -49,6 +60,9 @@ internal static class PluginConfig
 
         HeaderFontSize = ConfigOptions.Config(Appearance.HeaderFontSize);
         ListFontSize = ConfigOptions.Config(Appearance.ListFontSize);
+
+        UseKilometers = ConfigOptions.Config(Appearance.UseKilometers);
+        LocalPlayerTag = ConfigOptions.Config(Appearance.LocalPlayerTag);
 
         HeaderText = ConfigOptions.Config(Appearance.HeaderText);
 

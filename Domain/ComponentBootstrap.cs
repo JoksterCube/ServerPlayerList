@@ -7,7 +7,7 @@ namespace JoksterCube.ServerPlayerList.Domain;
 
 internal static class ComponentBootstrap
 {
-    private static ServerPlayerListInterfaceComponent _interface;
+    private static ServerPlayerListInterfaceComponent? _interface;
 
     internal static void Ensure()
     {

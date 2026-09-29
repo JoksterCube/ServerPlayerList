@@ -11,6 +11,7 @@
     <RootNamespace>JoksterCube.ServerPlayerList</RootNamespace>
     <AssemblyName>ServerPlayerList</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <RuntimeIdentifiers>win</RuntimeIdentifiers>
     <FileAlignment>512</FileAlignment>
     <LangVersion>10</LangVersion>
     <Nullable>enable</Nullable>
@@ -156,8 +157,8 @@
     <Compile Include="Common\ZRoutedExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.18.2" />
-    <PackageReference Include="YamlDotNet" Version="13.1.0" />
+    <PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.48" />
+    <PackageReference Include="YamlDotNet" Version="13.1.0" GeneratePathProperty="true" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
@@ -203,7 +204,7 @@
     <Copy SourceFiles="README.md" DestinationFolder="$(PackageDir)" OverwriteReadOnlyFiles="true" />
     <Copy SourceFiles="README.md" DestinationFolder="$(ProjectDir)\Thunderstore" OverwriteReadOnlyFiles="true" />
   </Target>
-  <UsingTask TaskName="WriteManifestFile" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+  <UsingTask TaskName="WriteManifestFile" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
     <ParameterGroup>
       <ManifestFile ParameterType="System.String" Required="true" />
       <AssemblyName ParameterType="System.String" Required="true" />

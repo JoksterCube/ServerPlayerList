@@ -11,7 +11,7 @@ internal static class Constants
     internal static class Plugin
     {
         internal const string ModName = "ServerPlayerList";
-        internal const string ModVersion = "1.0.3";
+        internal const string ModVersion = "1.1.0";
         internal const string Author = "JoksterCube";
         internal const string ModGUID = $"{Author}.{ModName}";
         internal const string Description = "Display currently online player number and information.";
@@ -52,6 +52,20 @@ internal static class Constants
                 "Show online player list.",
                 Toggle.On,
                 false);
+
+            internal static readonly ConfigInfo<Toggle> IgnoreRconUser = new(
+                Group,
+                "Ignore RCON user",
+                "Hide one player matching the configured server chat name of ValheimRcon by Tristan-dvr that would show N/A distance. Requires ServerPlayerList and ValheimRcon on the server. A real player with the same name and a private position may be hidden instead.",
+                Toggle.Off,
+                true);
+
+            internal static readonly ConfigInfo<string> IgnoredUsers = new(
+                Group,
+                "Ignored users",
+                "Comma-separated player names to hide. Synced from the server when ServerPlayerList is installed there; otherwise uses your local setting. Each occurrence hides one exact, case-sensitive match, preferring N/A distance entries. Repeat a name to hide multiple players. Spaces around entries and empty entries are ignored. Applied after RCON filtering.",
+                string.Empty,
+                true);
 
             internal static readonly ConfigInfo<float> RefreshDelay = new(
                 Group,
@@ -112,6 +126,20 @@ internal static class Constants
                 "List Font Size",
                 "Size of the lsit font.",
                 22,
+                false);
+
+            internal static readonly ConfigInfo<Toggle> UseKilometers = new(
+                Group,
+                "Use Kilometers",
+                "Show distances of 1000 m or more in km instead of m.",
+                Toggle.Off,
+                false);
+
+            internal static readonly ConfigInfo<string> LocalPlayerTag = new(
+                Group,
+                "Local Player Tag",
+                "Text shown instead of distance for your player. Use a symbol supported by the game font; leave empty to hide it.",
+                "\u16dd",
                 false);
 
             internal static readonly ConfigInfo<string> HeaderText = new(

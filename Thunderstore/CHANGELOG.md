@@ -1,5 +1,6 @@
 | Version | Update Notes |
 |----------|---------------|
+| **1.1.0** | - Added optional RCON player filtering and a configurable ignored-users list.<br>- Added kilometer display and a configurable local player tag.<br>- Updated the bundled ServerSync version. |
 | **1.0.3** | - Added secondary ordering for player list based on name (primary is distance). |
 | **1.0.2** | - Fixed Readme. |
 | **1.0.1** | - Tweaked distance thresholds and color logic.<br>- Panel pivot set to top-left to prevent movement when players join/leave.<br>- Fixed player entries not being removed when they disconnect.<br>- Added configurable refresh delay.<br>- Panel now auto-refreshes on updates. |
