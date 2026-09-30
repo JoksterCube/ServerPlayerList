@@ -44,19 +44,14 @@ With **Server Player List**, you get a small, unobtrusive panel showing the tota
 
 This feature supports [ValheimRcon by Tristan-dvr](https://thunderstore.io/c/valheim/p/Tristan/ValheimRcon/) (`org.tristan.rcon`).
 
-On the server, enable `Ignore RCON user = On` in the `[1 - General]` section of ServerPlayerList's configuration. This setting is server-synced and defaults to `Off`.
-
-When enabled, ServerPlayerList checks for the loaded `org.tristan.rcon` plugin and reads its active `[3. Chat]` / `Server name` configuration entry. Only this name is sent to clients, not the RCON password or other settings. At most one matching entry that would show `N/A` distance is excluded from both the list and online count. Changes take effect once ValheimRcon reloads its configuration; restart the server if necessary.
-
-Matching is exact and case-sensitive. The first matching entry with a private position is hidden, excluding the local player. Players with visible distances and all other matching entries remain. A real player with the same name and a private position may be hidden instead of the RCON entry. If ValheimRcon is absent, the configured name is empty, or the toggle is off, no entries are excluded.
+- **Setup:** On the server, enable `Ignore RCON user` under `[1 - General]`. Requires ValheimRcon on the server and matching ServerPlayerList versions on clients.
+- **Effect:** Hides one exact match for ValheimRcon's `[3. Chat]` / `Server name` when that player's position is private (`N/A`). Only the name is synced; RCON credentials stay on the server.
+- **Note:** A same-name player with a private position may be hidden. Reload ValheimRcon after changing its server name.
 
 #### Ignore List
 
-Set `Ignored users` in the `[1 - General]` configuration section to a comma-separated list, for example `Ignored users = Server, Server, AnotherPlayer`. This option is server-synced when ServerPlayerList is installed on the server; otherwise, your local setting is used. It works without a server installation or RCON plugin and is empty by default. To manage the list centrally, install matching ServerPlayerList versions on the server and connecting clients, then configure the server's list.
-
-Each occurrence of a name hides at most one matching player from both the list and online count. Repeating `Server` twice hides up to two players named `Server`; listing it once hides only one. Entries displaying `N/A` are removed first, then other matches. Your own entry can also be hidden if its name matches and no `N/A` match remains.
-
-Names are matched exactly and case-sensitively. Spaces around list entries and empty entries are ignored. Manual exclusions apply after RCON filtering, so using both options can hide additional matching players.
+- **Setup:** Enter comma-separated names under `[1 - General]` → `Ignored users` (for example, `Server, AnotherPlayer`). Empty by default; uses the server's setting when the mod is installed there, otherwise your local setting.
+- **Matching:** Exact and case-sensitive; surrounding spaces are ignored. Each name occurrence hides one player from the list and count, preferring `N/A` entries. Applied after RCON filtering; can also hide your own entry.
 
 ---
 
@@ -66,6 +61,6 @@ Report issues or suggest improvements via the mod’s Thunderstore page or GitHu
 
 ---
 
-**Author:** JoksterCube  
-**Version:** 1.0.3  
-**License:** MIT  
+**Author:** JoksterCube<br>
+**Version:** 1.1.1<br>
+**License:** MIT
