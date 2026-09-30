@@ -362,7 +362,10 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
 
     private void InitHeader()
     {
-        var headerGameObject = new GameObject(GameObjectNames.ServerPlayerListHeader, typeof(RectTransform), typeof(ContentSizeFitter), typeof(TextMeshProUGUI));
+        var headerGameObject = new GameObject(GameObjectNames.ServerPlayerListHeader, typeof(RectTransform));
+        headerGameObject.SetActive(false);
+        headerGameObject.AddComponent<ContentSizeFitter>();
+        headerGameObject.AddComponent<TextMeshProUGUI>();
         headerGameObject.transform.SetParent(_background.transform, false);
 
         var fitter = headerGameObject.GetComponent<ContentSizeFitter>();
@@ -376,6 +379,7 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
         _headerText.alignment = TextAlignmentOptions.Top;
 
         SetHeaderFromConfig();
+        headerGameObject.SetActive(true);
     }
 
     private void InitListContainer()
@@ -436,7 +440,11 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
 
     private TMP_Text SpawnElementName(Transform element)
     {
-        var playerNameGameObject = new GameObject(GameObjectNames.ServerPlayerListPlayerName, typeof(RectTransform), typeof(ContentSizeFitter), typeof(TextMeshProUGUI), typeof(FavoritePlayerName));
+        var playerNameGameObject = new GameObject(GameObjectNames.ServerPlayerListPlayerName, typeof(RectTransform));
+        playerNameGameObject.SetActive(false);
+        playerNameGameObject.AddComponent<ContentSizeFitter>();
+        playerNameGameObject.AddComponent<TextMeshProUGUI>();
+        playerNameGameObject.AddComponent<FavoritePlayerName>();
         playerNameGameObject.transform.SetParent(element, false);
 
         var fitter = playerNameGameObject.GetComponent<ContentSizeFitter>();
@@ -452,6 +460,7 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
         text.alignment = TextAlignmentOptions.Left;
 
         text.fontSize = PluginConfig.ListFontSize.Value;
+        playerNameGameObject.SetActive(true);
 
         return text;
     }
@@ -465,7 +474,10 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
 
     private TMP_Text SpawnElementDistance(Transform element)
     {
-        var playerNameGameObject = new GameObject(GameObjectNames.ServerPlayerListDistance, typeof(RectTransform), typeof(ContentSizeFitter), typeof(TextMeshProUGUI));
+        var playerNameGameObject = new GameObject(GameObjectNames.ServerPlayerListDistance, typeof(RectTransform));
+        playerNameGameObject.SetActive(false);
+        playerNameGameObject.AddComponent<ContentSizeFitter>();
+        playerNameGameObject.AddComponent<TextMeshProUGUI>();
         playerNameGameObject.transform.SetParent(element, false);
 
         var fitter = playerNameGameObject.GetComponent<ContentSizeFitter>();
@@ -480,6 +492,7 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
         text.alignment = TextAlignmentOptions.Right;
 
         text.fontSize = PluginConfig.ListFontSize.Value;
+        playerNameGameObject.SetActive(true);
 
         return text;
     }

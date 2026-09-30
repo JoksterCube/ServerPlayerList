@@ -90,7 +90,6 @@ The configuration file is `BepInEx\config\JoksterCube.ServerPlayerList.cfg`. Set
 | Appearance | Favorite Player Name Color | RGBA (1, 0.84, 0, 1) | Name color used to identify favorite players. |
 | Appearance | Header Text | Currently online: | Text displayed before the online player count. |
 | Inputs | Show List Keyboard shortcut | Right Control + O | Toggle the player list between compact and expanded modes. |
-| Inputs | Toggle N/A Distance Filter Shortcut | Right Control + P | Toggle hiding players who are not sharing their position. |
 
 ---
 

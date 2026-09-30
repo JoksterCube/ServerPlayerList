@@ -1,5 +1,6 @@
 | Version | Update Notes |
 |----------|---------------|
+| **1.2.1** | - Removed the Ctrl+P shortcut for toggling the N/A distance filter.<br>- Fixed missing font warnings when creating player name and distance entries. |
 | **1.2.0** | - Added configurable distance and visible row limits, plus right-click favorites that fill the row limit first, remain visible beyond it, bypass local display filters, and use a configurable name color.<br>- Added options to hide your own row or players with private positions, and direction arrows with camera-relative or character-relative orientation. |
 | **1.1.2** | - Collapsed mode skips distance calculations and position lookups.<br>- Its filtered counter uses local player data without extra network requests.<br>- The toggle shortcut is ignored while typing or using game menus.<br>- Player details wait for the initial server version and config sync. |
 | **1.1.1** | - Shortened and clarified the README's RCON filtering and ignore-list instructions. |

@@ -42,7 +42,6 @@ internal static class PluginConfig
     internal static ConfigEntry<string> HeaderText = null!;
 
     internal static ConfigEntry<KeyboardShortcut> ShowListKeyboardShortcut = null!;
-    internal static ConfigEntry<KeyboardShortcut> ToggleHideNaPlayersKeyboardShortcut = null!;
 
     internal static void Build(ConfigFile config, ConfigSync configSync)
     {
@@ -83,6 +82,5 @@ internal static class PluginConfig
         HeaderText = ConfigOptions.Config(Appearance.HeaderText);
 
         ShowListKeyboardShortcut = ConfigOptions.Config(Inputs.ShowListKeyboardShortcut);
-        ToggleHideNaPlayersKeyboardShortcut = ConfigOptions.Config(Inputs.ToggleHideNaPlayersKeyboardShortcut);
     }
 }
