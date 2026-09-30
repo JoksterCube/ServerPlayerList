@@ -28,7 +28,7 @@ internal class DragNDrop : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (!_rootCanvas) return;
+        if (!_rootCanvas || eventData.button != PointerEventData.InputButton.Left) return;
 
         _isDragging = true;
         _startAnchoredPosition = _target.anchoredPosition;
@@ -51,7 +51,7 @@ internal class DragNDrop : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        if (!_isDragging) return;
+        if (!_isDragging || eventData.button != PointerEventData.InputButton.Left) return;
         _isDragging = false;
 
         if (_shouldReturn)
@@ -89,13 +89,16 @@ internal class DragNDrop : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     {
         if (!_clampWithin) return desired;
 
-        var clampSize = _clampWithin.rect.size;
-        var targetSize = _target.rect.size;
+        var clampRect = _clampWithin.rect;
+        var targetRect = _target.rect;
+        var anchor = new Vector2(
+            Mathf.Lerp(clampRect.xMin, clampRect.xMax, _target.anchorMin.x),
+            Mathf.Lerp(clampRect.yMin, clampRect.yMax, _target.anchorMin.y));
 
-        var minX = -clampSize.x * 0.5f + targetSize.x * _target.pivot.x;
-        var maxX = clampSize.x * 0.5f - targetSize.x * (1f - _target.pivot.x);
-        var minY = -clampSize.y * 0.5f + targetSize.y * _target.pivot.y;
-        var maxY = clampSize.y * 0.5f - targetSize.y * (1f - _target.pivot.y);
+        var minX = clampRect.xMin - anchor.x - targetRect.xMin;
+        var maxX = clampRect.xMax - anchor.x - targetRect.xMax;
+        var minY = clampRect.yMin - anchor.y - targetRect.yMin;
+        var maxY = clampRect.yMax - anchor.y - targetRect.yMax;
 
         desired.x = Mathf.Clamp(desired.x, minX, maxX);
         desired.y = Mathf.Clamp(desired.y, minY, maxY);

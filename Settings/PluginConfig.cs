@@ -11,6 +11,8 @@ internal static class PluginConfig
     private static ConfigEntry<Toggle> _serverConfigLocked = null!;
 
     internal static ConfigEntry<Toggle> ShowPlayers = null!;
+    internal static ConfigEntry<Toggle> HideLocalPlayer = null!;
+    internal static ConfigEntry<Toggle> HideNaPlayers = null!;
 
     internal static ConfigEntry<Toggle> IgnoreRconUser = null!;
 
@@ -27,13 +29,20 @@ internal static class PluginConfig
 
     internal static ConfigEntry<int> HeaderFontSize = null!;
     internal static ConfigEntry<int> ListFontSize = null!;
+    internal static ConfigEntry<Color> FavoritePlayerNameColor = null!;
 
     internal static ConfigEntry<Toggle> UseKilometers = null!;
+    internal static ConfigEntry<float> MaxPlayerDistance = null!;
+    internal static ConfigEntry<int> MaxVisiblePlayers = null!;
+    internal static ConfigEntry<string> FavoritePlayers = null!;
+    internal static ConfigEntry<Toggle> ShowPlayerDirection = null!;
+    internal static ConfigEntry<DirectionReference> DirectionReference = null!;
     internal static ConfigEntry<string> LocalPlayerTag = null!;
 
     internal static ConfigEntry<string> HeaderText = null!;
 
     internal static ConfigEntry<KeyboardShortcut> ShowListKeyboardShortcut = null!;
+    internal static ConfigEntry<KeyboardShortcut> ToggleHideNaPlayersKeyboardShortcut = null!;
 
     internal static void Build(ConfigFile config, ConfigSync configSync)
     {
@@ -42,11 +51,13 @@ internal static class PluginConfig
         _serverConfigLocked = ConfigOptions.Config(General.Lock);
         configSync.AddLockingConfigEntry(_serverConfigLocked);
 
-        ShowPlayers = ConfigOptions.Config(General.ShowPlayers);
+        ShowPlayers = ConfigOptions.Config(PlayerList.ShowPlayers);
+        HideLocalPlayer = ConfigOptions.Config(PlayerList.HideLocalPlayer);
+        HideNaPlayers = ConfigOptions.Config(PlayerList.HideNaPlayers);
 
-        IgnoreRconUser = ConfigOptions.Config(General.IgnoreRconUser);
+        IgnoreRconUser = ConfigOptions.Config(PlayerList.IgnoreRconUser);
 
-        IgnoredUsers = ConfigOptions.Config(General.IgnoredUsers);
+        IgnoredUsers = ConfigOptions.Config(PlayerList.IgnoredUsers);
 
         RefreshDelay = ConfigOptions.Config(General.RefreshDelay);
 
@@ -59,12 +70,19 @@ internal static class PluginConfig
 
         HeaderFontSize = ConfigOptions.Config(Appearance.HeaderFontSize);
         ListFontSize = ConfigOptions.Config(Appearance.ListFontSize);
+        FavoritePlayerNameColor = ConfigOptions.Config(Appearance.FavoritePlayerNameColor);
 
-        UseKilometers = ConfigOptions.Config(Appearance.UseKilometers);
-        LocalPlayerTag = ConfigOptions.Config(Appearance.LocalPlayerTag);
+        UseKilometers = ConfigOptions.Config(PlayerList.UseKilometers);
+        MaxPlayerDistance = ConfigOptions.Config(PlayerList.MaxPlayerDistance);
+        MaxVisiblePlayers = ConfigOptions.Config(PlayerList.MaxVisiblePlayers);
+        FavoritePlayers = ConfigOptions.Config(PlayerList.FavoritePlayers);
+        ShowPlayerDirection = ConfigOptions.Config(PlayerList.ShowPlayerDirection);
+        DirectionReference = ConfigOptions.Config(PlayerList.DirectionReference);
+        LocalPlayerTag = ConfigOptions.Config(PlayerList.LocalPlayerTag);
 
         HeaderText = ConfigOptions.Config(Appearance.HeaderText);
 
         ShowListKeyboardShortcut = ConfigOptions.Config(Inputs.ShowListKeyboardShortcut);
+        ToggleHideNaPlayersKeyboardShortcut = ConfigOptions.Config(Inputs.ToggleHideNaPlayersKeyboardShortcut);
     }
 }

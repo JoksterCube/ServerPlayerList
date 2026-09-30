@@ -75,7 +75,7 @@ internal static class RemoveDisconnectedPeerFromVerified
 
 internal static class RpcHandlers
 {
-    internal static readonly List<ZRpc> ValidatedPeers = new();
+    internal static readonly List<ZRpc> ValidatedPeers = [];
     private static bool _waitingForServerVersion;
     private static bool _serverVersionReceived;
     private static float _serverVersionCheckStartedAt;

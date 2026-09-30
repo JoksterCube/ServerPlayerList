@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using JoksterCube.ServerPlayerList.Common;
 using JoksterCube.ServerPlayerList.Settings;
@@ -7,18 +8,59 @@ namespace JoksterCube.ServerPlayerList.Domain;
 
 internal static class ServerPlayerTracker
 {
-    private static List<ZNet.PlayerInfo> _players = new();
+    private static List<ZNet.PlayerInfo> _players = [];
     private static int _currentlyOnline;
 
     internal static int CurrentlyOnline =>
         _currentlyOnline;
 
-    internal static List<ServerPlayerInfo> GetCurrenlyOnlineList() =>
-        _players
-            .Select(x => new ServerPlayerInfo(x))
-            .OrderBy(x => x.Distance)
-            .ThenBy(x => x.Name)
+    internal static void ToggleFavorite(string playerName)
+    {
+        var favoritePlayers = PluginConfig.FavoritePlayers.Value
+            .Split(',')
+            .Select(name => name.Trim())
+            .Where(name => name.Length > 0)
             .ToList();
+        var removed = favoritePlayers.RemoveAll(name => string.Equals(name, playerName, StringComparison.Ordinal)) > 0;
+
+        if (!removed)
+            favoritePlayers.Add(playerName);
+
+        PluginConfig.FavoritePlayers.Value = string.Join(", ", favoritePlayers);
+    }
+
+    internal static List<ServerPlayerInfo> GetCurrenlyOnlineList()
+    {
+        var favoritePlayers = new HashSet<string>(
+            PluginConfig.FavoritePlayers.Value.Split(',').Select(name => name.Trim()).Where(name => name.Length > 0));
+        var hideLocalPlayer = PluginConfig.HideLocalPlayer.Value.IsOn();
+        var hideNaPlayers = PluginConfig.HideNaPlayers.Value.IsOn();
+        var maxDistance = PluginConfig.MaxPlayerDistance.Value;
+        var maxVisiblePlayers = PluginConfig.MaxVisiblePlayers.Value;
+
+        var playerInfos = _players
+            .Select(x => new ServerPlayerInfo(x, favoritePlayers.Contains(x.m_name.Trim())))
+            .Where(info => info.IsFavorite || (
+                (!hideLocalPlayer || !info.IsMe)
+                && (!hideNaPlayers || info.IsMe || info.IsPublic)
+                && (maxDistance <= 0 || info.Distance <= maxDistance)))
+            .OrderByDescending(info => info.IsMe)
+            .ThenByDescending(info => info.IsFavorite)
+            .ThenBy(info => info.Distance)
+            .ThenBy(info => info.Name)
+            .ToList();
+
+        if (maxVisiblePlayers <= 0)
+            return playerInfos;
+
+        var regularRowLimit = Math.Max(0, maxVisiblePlayers - playerInfos.Count(info => info.IsFavorite));
+        var regularRows = new HashSet<ServerPlayerInfo>(
+            playerInfos.Where(info => !info.IsFavorite).Take(regularRowLimit));
+
+        return playerInfos
+            .Where(info => info.IsFavorite || regularRows.Contains(info))
+            .ToList();
+    }
 
     internal static void UpdatePlayerInfo()
     {

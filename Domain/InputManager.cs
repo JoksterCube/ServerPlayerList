@@ -11,10 +11,17 @@ internal static class InputManager
 {
     internal static void Update(Plugin plugin)
     {
-        if (!ShowListKeyboardShortcut.Value.IsKeyDown()) return;
+        var showListPressed = ShowListKeyboardShortcut.Value.IsKeyDown();
+        var toggleNaFilterPressed = ToggleHideNaPlayersKeyboardShortcut.Value.IsKeyDown();
+        if (!showListPressed && !toggleNaFilterPressed) return;
         if (!ServerPlayerListInterfaceComponent.ShouldBeVisible() || IsTyping()) return;
 
-        ShowPlayers.Value = ShowPlayers.Value.Not();
+        if (showListPressed)
+            ShowPlayers.Value = ShowPlayers.Value.Not();
+
+        if (toggleNaFilterPressed)
+            HideNaPlayers.Value = HideNaPlayers.Value.Not();
+
         plugin.Config.Save();
     }
 

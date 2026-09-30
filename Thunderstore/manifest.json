@@ -1,6 +1,6 @@
 {
   "name": "ServerPlayerList",
-  "version_number": "1.1.2",
+  "version_number": "1.2.0",
   "website_url": "https://github.com/JoksterCube/ServerPlayerList",
   "description": "Display currently online player number, list and distance.",
   "dependencies": [

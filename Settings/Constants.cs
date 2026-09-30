@@ -6,12 +6,18 @@ using UnityEngine;
 
 namespace JoksterCube.ServerPlayerList.Settings;
 
+internal enum DirectionReference
+{
+    Camera,
+    Character
+}
+
 internal static class Constants
 {
     internal static class Plugin
     {
         internal const string ModName = "ServerPlayerList";
-        internal const string ModVersion = "1.1.2";
+        internal const string ModVersion = "1.2.0";
         internal const string Author = "JoksterCube";
         internal const string ModGUID = $"{Author}.{ModName}";
         internal const string Description = "Display currently online player number and information.";
@@ -46,11 +52,37 @@ internal static class Constants
                 Toggle.On,
                 true);
 
+            internal static readonly ConfigInfo<float> RefreshDelay = new(
+                Group,
+                "Refresh Delay",
+                "Time in seconds in bedtween refreshes.",
+                .25f,
+                true);
+        }
+
+        internal static class PlayerList
+        {
+            internal const string Group = "2 - Player List";
+
             internal static readonly ConfigInfo<Toggle> ShowPlayers = new(
                 Group,
                 "Show Players",
                 "Show online player list.",
                 Toggle.On,
+                false);
+
+            internal static readonly ConfigInfo<Toggle> HideLocalPlayer = new(
+                Group,
+                "Hide Local Player",
+                "Hide your own non-favorite row from the expanded list. Does not affect the online player count.",
+                Toggle.On,
+                false);
+
+            internal static readonly ConfigInfo<Toggle> HideNaPlayers = new(
+                Group,
+                "Hide Players with N/A Distance",
+                "Hide non-favorite players who are not sharing their position from the expanded list. Does not affect the online player count.",
+                Toggle.Off,
                 false);
 
             internal static readonly ConfigInfo<Toggle> IgnoreRconUser = new(
@@ -67,23 +99,65 @@ internal static class Constants
                 string.Empty,
                 true);
 
-            internal static readonly ConfigInfo<float> RefreshDelay = new(
+            internal static readonly ConfigInfo<Toggle> UseKilometers = new(
                 Group,
-                "Refresh Delay",
-                "Time in seconds in bedtween refreshes.",
-                .25f,
-                true);
+                "Use Kilometers",
+                "Show distances of 1000 m or more in km instead of m.",
+                Toggle.On,
+                false);
+
+            internal static readonly ConfigInfo<float> MaxPlayerDistance = new(
+                Group,
+                "Maximum Player Distance",
+                new ConfigDescription("Hide non-favorite players farther than this distance in meters. Set to 0 to disable.", new AcceptableValueRange<float>(0, 20000)),
+                0,
+                false);
+
+            internal static readonly ConfigInfo<int> MaxVisiblePlayers = new(
+                Group,
+                "Maximum Visible Players",
+                new ConfigDescription("Maximum number of player rows to show. Favorites fill the limit first, and all favorites remain visible if they exceed it. Set to 0 for no limit.", new AcceptableValueRange<int>(0, 20)),
+                0,
+                false);
+
+            internal static readonly ConfigInfo<string> FavoritePlayers = new(
+                Group,
+                "Favorite Players",
+                "Comma-separated player names to always show while online, above other players. Favorites bypass local display filters and remain visible when their count exceeds the row limit; explicit ignored-user and RCON filters still apply. Matching is exact and case-sensitive.",
+                string.Empty,
+                false);
+
+            internal static readonly ConfigInfo<Toggle> ShowPlayerDirection = new(
+                Group,
+                "Show Player Direction",
+                "Show a relative direction arrow before the distance for players sharing their position.",
+                Toggle.On,
+                false);
+
+            internal static readonly ConfigInfo<DirectionReference> DirectionReference = new(
+                Group,
+                "Direction Reference",
+                "Choose whether direction arrows are relative to the camera or character facing direction.",
+                Settings.DirectionReference.Camera,
+                false);
+
+            internal static readonly ConfigInfo<string> LocalPlayerTag = new(
+                Group,
+                "Local Player Tag",
+                "Text shown instead of distance for your player. Use a symbol supported by the game font; leave empty to hide it.",
+                "\u16dd",
+                false);
         }
 
         internal static class Appearance
         {
-            internal const string Group = "2 - Appearance";
+            internal const string Group = "3 - Appearance";
 
             internal static readonly ConfigInfo<Vector2> AnchorPosition = new(
                 Group,
                 "Anchor Position",
-                "Position for the Server Player list view.",
-                new(720.25f, 296.75f),
+                "Offset of the Server Player list view from the upper-right corner.",
+                new(-239.75f, -243.25f),
                 false);
 
             internal static readonly ConfigInfo<float> Width = new(
@@ -128,18 +202,11 @@ internal static class Constants
                 22,
                 false);
 
-            internal static readonly ConfigInfo<Toggle> UseKilometers = new(
+            internal static readonly ConfigInfo<Color> FavoritePlayerNameColor = new(
                 Group,
-                "Use Kilometers",
-                "Show distances of 1000 m or more in km instead of m.",
-                Toggle.Off,
-                false);
-
-            internal static readonly ConfigInfo<string> LocalPlayerTag = new(
-                Group,
-                "Local Player Tag",
-                "Text shown instead of distance for your player. Use a symbol supported by the game font; leave empty to hide it.",
-                "\u16dd",
+                "Favorite Player Name Color",
+                "Name color used to identify favorite players in the list.",
+                new Color(1f, .84f, 0f, 1f),
                 false);
 
             internal static readonly ConfigInfo<string> HeaderText = new(
@@ -152,13 +219,20 @@ internal static class Constants
 
         internal static class Inputs
         {
-            internal const string Group = "3 - Inputs";
+            internal const string Group = "4 - Inputs";
 
             internal static readonly ConfigInfo<KeyboardShortcut> ShowListKeyboardShortcut = new(
                 Group,
                 "Show List Keyboard shortcut",
                 "Input used to display online player list.",
                 new(KeyCode.O, KeyCode.RightControl),
+                false);
+
+            internal static readonly ConfigInfo<KeyboardShortcut> ToggleHideNaPlayersKeyboardShortcut = new(
+                Group,
+                "Toggle N/A Distance Filter Shortcut",
+                "Input used to toggle hiding players who are not sharing their position.",
+                new(KeyCode.P, KeyCode.RightControl),
                 false);
         }
     }

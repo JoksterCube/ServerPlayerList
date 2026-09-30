@@ -14,6 +14,8 @@ namespace JoksterCube.ServerPlayerList.MonoBehaviours;
 internal class ServerPlayerListInterfaceComponent : DragNDrop
 {
     private const int Pad = 5;
+    private static readonly Vector2 LegacyDefaultAnchorPosition = new(720.25f, 296.75f);
+    private static readonly Vector2 DefaultAnchorPosition = new(-239.75f, -243.25f);
 
     private TMP_FontAsset _font = null!;
     private Color _color;
@@ -37,7 +39,7 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
 
         base.Awake();
 
-        GetSyles();
+        GetStyles();
 
         InitGameObjects();
         ApplyFromConfig();
@@ -69,11 +71,48 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
         LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)_background.transform);
     }
 
-    private void GetSyles()
+    private void GetStyles()
     {
-        var text = EnemyHud.instance.m_baseHudPlayer.GetComponentInChildren<TMP_Text>();
+        TMP_Text? text = null;
+        if (EnemyHud.instance && EnemyHud.instance.m_baseHudPlayer)
+            text = FindTextWithFont(EnemyHud.instance.m_baseHudPlayer);
+
+        if (!text && Hud.instance && Hud.instance.m_rootObject)
+            text = FindTextWithFont(Hud.instance.m_rootObject);
+
+        if (!text)
+        {
+            foreach (var candidate in Resources.FindObjectsOfTypeAll<TMP_Text>())
+            {
+                if (candidate && candidate.font)
+                {
+                    text = candidate;
+                    break;
+                }
+            }
+        }
+
+        if (!text)
+        {
+            Plugin.ModLogger.LogWarning("Could not find a loaded TextMeshPro font asset for the player list.");
+            _font = TMP_Settings.defaultFontAsset;
+            _color = Color.white;
+            return;
+        }
+
         _font = text.font;
         _color = text.color;
+    }
+
+    private static TMP_Text? FindTextWithFont(GameObject root)
+    {
+        foreach (var text in root.GetComponentsInChildren<TMP_Text>(true))
+        {
+            if (text && text.font)
+                return text;
+        }
+
+        return null;
     }
 
     private void SetListVisibility(bool visible)
@@ -137,6 +176,7 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
         PluginConfig.HeaderTextColor.SettingChanged += OnConfigChanged;
 
         PluginConfig.HeaderFontSize.SettingChanged += OnConfigChanged;
+        PluginConfig.ListFontSize.SettingChanged += OnConfigChanged;
         PluginConfig.ShowPlayers.SettingChanged += OnShowPlayersChanged;
     }
 
@@ -152,6 +192,7 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
         PluginConfig.HeaderTextColor.SettingChanged -= OnConfigChanged;
 
         PluginConfig.HeaderFontSize.SettingChanged -= OnConfigChanged;
+        PluginConfig.ListFontSize.SettingChanged -= OnConfigChanged;
         PluginConfig.ShowPlayers.SettingChanged -= OnShowPlayersChanged;
     }
 
@@ -173,15 +214,25 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
         SetListVisibility(false);
     }
 
-    private void OnConfigChanged(object sender, EventArgs e) =>
+    private void OnConfigChanged(object sender, EventArgs e)
+    {
+        if (_applyingFromConfig) return;
         ApplyFromConfig();
+    }
 
     private void ApplyFromConfig()
     {
         _applyingFromConfig = true;
         try
         {
-            SetAnchoredPosition(PluginConfig.AnchorPosition.Value);
+            var anchorPosition = PluginConfig.AnchorPosition.Value;
+            if (anchorPosition == LegacyDefaultAnchorPosition)
+            {
+                anchorPosition = DefaultAnchorPosition;
+                PluginConfig.AnchorPosition.Value = anchorPosition;
+            }
+
+            SetAnchoredPosition(anchorPosition);
             SetMainFromConfig();
             SetBackgroundFromConfig();
             SetHeaderFromConfig();
@@ -215,7 +266,15 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
         {
             element.Name.fontSize = PluginConfig.ListFontSize.Value;
             element.Distance.fontSize = PluginConfig.ListFontSize.Value;
+            element.GetComponent<LayoutElement>().preferredHeight = GetPreferredRowHeight(element);
         }
+    }
+
+    private static float GetPreferredRowHeight(PlayerInfoElement element)
+    {
+        var nameHeight = element.Name.GetPreferredValues("M").y;
+        var distanceHeight = element.Distance.GetPreferredValues("\u2191 999.99 km").y;
+        return Mathf.Ceil(Mathf.Max(nameHeight, distanceHeight));
     }
 
     private void Save(Vector2 anchoredPosition)
@@ -263,8 +322,8 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
     {
         _mainRect = (RectTransform)transform;
 
-        _mainRect.anchorMin = Vector2Extensions.Center;
-        _mainRect.anchorMax = Vector2Extensions.Center;
+        _mainRect.anchorMin = Vector2.one;
+        _mainRect.anchorMax = Vector2.one;
         _mainRect.pivot = Vector2.up;
 
         var layout = gameObject.AddComponent<VerticalLayoutGroup>();
@@ -330,7 +389,7 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
         layout.childControlHeight = false;
         layout.childForceExpandWidth = true;
         layout.childForceExpandHeight = false;
-        layout.spacing = Pad;
+        layout.spacing = 0f;
 
         var fitter = containerGameObject.GetComponent<ContentSizeFitter>();
         fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
@@ -350,13 +409,16 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
         var info = SpawnElementMain();
         info.Name = SpawnElementName(info.transform);
         info.Distance = SpawnElementDistance(info.transform);
+        info.Name.gameObject.GetComponent<FavoritePlayerName>().Initialize(info);
+        info.FavoriteChanged += OnFavoriteChanged;
+        info.GetComponent<LayoutElement>().preferredHeight = GetPreferredRowHeight(info);
 
         return info;
     }
 
     private PlayerInfoElement SpawnElementMain()
     {
-        var elementGameObject = new GameObject(GameObjectNames.ServerPlayerListPlayerInfo, typeof(RectTransform), typeof(HorizontalLayoutGroup), typeof(ContentSizeFitter), typeof(PlayerInfoElement));
+        var elementGameObject = new GameObject(GameObjectNames.ServerPlayerListPlayerInfo, typeof(RectTransform), typeof(HorizontalLayoutGroup), typeof(ContentSizeFitter), typeof(LayoutElement), typeof(PlayerInfoElement));
         elementGameObject.transform.SetParent(_container, false);
 
         var layout = elementGameObject.GetComponent<HorizontalLayoutGroup>();
@@ -374,7 +436,7 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
 
     private TMP_Text SpawnElementName(Transform element)
     {
-        var playerNameGameObject = new GameObject(GameObjectNames.ServerPlayerListPlayerName, typeof(RectTransform), typeof(ContentSizeFitter), typeof(TextMeshProUGUI));
+        var playerNameGameObject = new GameObject(GameObjectNames.ServerPlayerListPlayerName, typeof(RectTransform), typeof(ContentSizeFitter), typeof(TextMeshProUGUI), typeof(FavoritePlayerName));
         playerNameGameObject.transform.SetParent(element, false);
 
         var fitter = playerNameGameObject.GetComponent<ContentSizeFitter>();
@@ -392,6 +454,13 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
         text.fontSize = PluginConfig.ListFontSize.Value;
 
         return text;
+    }
+
+    private void OnFavoriteChanged()
+    {
+        lastRefresh = Time.time;
+        Refresh(showPlayers: true);
+        LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)_background.transform);
     }
 
     private TMP_Text SpawnElementDistance(Transform element)
@@ -417,10 +486,9 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
 
     private void DeleteElements(int number)
     {
-        var listCount = _containerElements.Count;
-        for (var i = listCount - number; i < listCount; i++)
+        for (var i = 0; i < number && _containerElements.Count > 0; i++)
         {
-            DeleteElement(i);
+            DeleteElement(_containerElements.Count - 1);
         }
     }
 

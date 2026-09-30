@@ -129,6 +129,7 @@
     <Compile Include="MonoBehaviours\PlayerInfoElement.cs" />
     <Compile Include="Domain\ServerPlayerTracker.cs" />
     <Compile Include="Domain\ServerPlayerInfo.cs" />
+    <Compile Include="MonoBehaviours\FavoritePlayerName.cs" />
     <Compile Include="MonoBehaviours\ServerPlayerListInterfaceComponent.cs" />
     <Compile Include="Patches\ZNetScene\ZNetSceneAwakePatch.cs" />
     <Compile Include="Plugin.cs" />
