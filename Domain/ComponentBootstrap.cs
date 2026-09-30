@@ -1,6 +1,5 @@
 ﻿using JoksterCube.ServerPlayerList.MonoBehaviours;
 using UnityEngine;
-using UnityEngine.UI;
 using static JoksterCube.ServerPlayerList.Settings.Constants;
 
 namespace JoksterCube.ServerPlayerList.Domain;

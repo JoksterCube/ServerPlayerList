@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using HarmonyLib;
+using UnityEngine;
 using static JoksterCube.ServerPlayerList.Settings.Constants.Plugin;
 
 namespace JoksterCube.ServerPlayerList.Common;
@@ -10,6 +11,9 @@ internal static class RegisterAndCheckVersion
 {
     private static void Prefix(ZNetPeer peer, ref ZNet __instance)
     {
+        if (!__instance.IsServer())
+            RpcHandlers.BeginServerVersionCheck();
+
         // Register version check call
         Plugin.ModLogger.LogDebug("Registering version RPC handler");
         peer.m_rpc.Register($"{ModName}_VersionCheck",
@@ -58,7 +62,11 @@ internal static class RemoveDisconnectedPeerFromVerified
 {
     private static void Prefix(ZNetPeer peer, ref ZNet __instance)
     {
-        if (!__instance.IsServer()) return;
+        if (!__instance.IsServer())
+        {
+            RpcHandlers.ResetServerVersionCheck();
+            return;
+        }
         // Remove peer from validated list
         Plugin.ModLogger.LogInfo($"Peer ({peer.m_rpc.m_socket.GetHostName()}) disconnected, removing from validated list");
         _ = RpcHandlers.ValidatedPeers.Remove(peer.m_rpc);
@@ -68,22 +76,56 @@ internal static class RemoveDisconnectedPeerFromVerified
 internal static class RpcHandlers
 {
     internal static readonly List<ZRpc> ValidatedPeers = new();
+    private static bool _waitingForServerVersion;
+    private static bool _serverVersionReceived;
+    private static float _serverVersionCheckStartedAt;
+
+    internal static bool ShouldWaitForInitialConfigSync
+    {
+        get
+        {
+            if (!ZNet.instance || ZNet.instance.IsServer() || !_waitingForServerVersion) return false;
+            if (_serverVersionReceived) return !Plugin.InitialConfigSyncDone;
+
+            return Time.realtimeSinceStartup - _serverVersionCheckStartedAt < 1f;
+        }
+    }
+
+    internal static void BeginServerVersionCheck()
+    {
+        _waitingForServerVersion = true;
+        _serverVersionReceived = false;
+        _serverVersionCheckStartedAt = Time.realtimeSinceStartup;
+    }
+
+    internal static void ResetServerVersionCheck()
+    {
+        _waitingForServerVersion = false;
+        _serverVersionReceived = false;
+    }
 
     internal static void RPC_ServerSyncModTemplate_Version(ZRpc rpc, ZPackage pkg)
     {
         string version = pkg.ReadString();
+        var instance = ZNet.instance;
+        if (!instance) return;
+
+        var isServer = instance.IsServer();
+        if (!isServer)
+            _serverVersionReceived = true;
+
         Plugin.ModLogger.LogInfo($"Version check, local: {ModVersion},  remote: {version}");
         if (version != ModVersion)
         {
             Plugin.ConnectionError = $"{ModName} Installed: {ModVersion}\n Needed: {version}";
-            if (!ZNet.instance.IsServer()) return;
+            if (!isServer) return;
             // Different versions - force disconnect client from server
             Plugin.ModLogger.LogWarning($"Peer ({rpc.m_socket.GetHostName()}) has incompatible version, disconnecting...");
             rpc.Invoke("Error", 3);
         }
         else
         {
-            if (!ZNet.instance.IsServer())
+            if (!isServer)
             {
                 // Enable mod on client if versions match
                 Plugin.ModLogger.LogInfo("Received same version from server!");

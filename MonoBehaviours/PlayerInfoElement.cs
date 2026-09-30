@@ -9,15 +9,23 @@ namespace JoksterCube.ServerPlayerList.MonoBehaviours;
 
 internal class PlayerInfoElement : MonoBehaviour
 {
-    internal ServerPlayerInfo? PlayerInfo { get; set; }
-    internal TMP_Text Name { get; set; } = null!;
-    internal TMP_Text Distance { get; set; } = null!;
-
     private ServerPlayerInfo? lastInfo;
     private Toggle lastUseKilometers;
     private string? lastLocalPlayerTag;
 
-    private void Update()
+    internal ServerPlayerInfo? PlayerInfo { get; set; }
+    internal TMP_Text Name { get; set; } = null!;
+    internal TMP_Text Distance { get; set; } = null!;
+
+    internal void SetPlayerInfo(ServerPlayerInfo playerInfo)
+    {
+        PlayerInfo = playerInfo;
+        UpdateDisplay();
+    }
+
+    private void Update() => UpdateDisplay();
+
+    private void UpdateDisplay()
     {
         var playerInfo = PlayerInfo;
         var useKilometers = PluginConfig.UseKilometers.Value;
@@ -27,10 +35,8 @@ internal class PlayerInfoElement : MonoBehaviour
         Name.text = playerInfo.Name;
         Distance.color = DistanceColor(playerInfo);
         Distance.text = playerInfo.IsMe
-            ? localPlayerTag == "\u265b" && !Distance.font.HasCharacter('\u265b')
-                ? Distance.font.HasCharacter('\u2605') ? "\u2605" : "@"
-                : localPlayerTag
-            : FormatDistance(playerInfo);
+            ? localPlayerTag
+            : FormatDistance(playerInfo, useKilometers.IsOn());
 
         lastInfo = playerInfo;
         lastUseKilometers = useKilometers;
@@ -39,10 +45,10 @@ internal class PlayerInfoElement : MonoBehaviour
 
     private static Color DistanceColor(ServerPlayerInfo playerInfo) => DistanceColors[playerInfo.DistancIndicator];
 
-    private static string FormatDistance(ServerPlayerInfo playerInfo)
+    private static string FormatDistance(ServerPlayerInfo playerInfo, bool useKilometers)
     {
         if (!playerInfo.IsPublic) return "N/A";
-        if (PluginConfig.UseKilometers.IsOn() && playerInfo.Distance >= 1000)
+        if (useKilometers && playerInfo.Distance >= 1000)
             return $"{playerInfo.Distance / 1000:F2} km";
 
         return playerInfo.Distance switch

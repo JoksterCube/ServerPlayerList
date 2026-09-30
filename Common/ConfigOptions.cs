@@ -17,7 +17,6 @@ internal static class ConfigOptions
         ConfigSync = configSync;
     }
 
-
     internal static ConfigEntry<T> Config<T>(string group, string name, T value, ConfigDescription description, bool synchronizedSetting = true)
     {
         ConfigDescription extendedDescription = new(
@@ -48,13 +47,14 @@ internal static class ConfigOptions
         [UsedImplicitly] public Action<ConfigEntryBase> CustomDrawer = null!;
     }
 
-    class AcceptableShortcuts : AcceptableValueBase
+    private class AcceptableShortcuts : AcceptableValueBase
     {
         public AcceptableShortcuts() : base(typeof(KeyboardShortcut))
         {
         }
 
         public override object Clamp(object value) => value;
+
         public override bool IsValid(object value) => true;
 
         public override string ToDescriptionString() => $"# Acceptable values: {string.Join(", ", UnityInput.Current.SupportedKeyCodes)}";

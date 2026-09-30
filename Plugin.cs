@@ -1,6 +1,5 @@
 ﻿using BepInEx;
 using BepInEx.Bootstrap;
-using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
 using JoksterCube.ServerPlayerList.Common;
@@ -17,13 +16,9 @@ namespace JoksterCube.ServerPlayerList;
 [BepInPlugin(ModGUID, ModName, ModVersion)]
 public class Plugin : BaseUnityPlugin
 {
-    internal static string ConnectionError = string.Empty;
-
-    private readonly string ConfigFileFullPath = Paths.ConfigPath + Path.DirectorySeparatorChar + ConfigFileName;
-
-    private readonly Harmony _harmony = new(ModGUID);
-
     public static readonly ManualLogSource ModLogger = BepInEx.Logging.Logger.CreateLogSource(ModName);
+
+    internal static string ConnectionError = string.Empty;
 
     private static readonly ConfigSync ConfigSync = new(ModGUID)
     {
@@ -33,6 +28,14 @@ public class Plugin : BaseUnityPlugin
     };
 
     internal static readonly CustomSyncedValue<string> RconPlayerName = new(ConfigSync, "RconPlayerName", string.Empty);
+
+    internal static bool InitialConfigSyncDone => ConfigSync.InitialSyncDone;
+
+    private readonly string ConfigFileFullPath = Paths.ConfigPath + Path.DirectorySeparatorChar + ConfigFileName;
+
+    private FileSystemWatcher? _configWatcher;
+
+    private readonly Harmony _harmony = new(ModGUID);
 
     private void Awake()
     {
@@ -66,16 +69,21 @@ public class Plugin : BaseUnityPlugin
             RconPlayerName.Value = name;
     }
 
-    private void OnDestroy() => Config.Save();
+    private void OnDestroy()
+    {
+        _configWatcher?.Dispose();
+        Config.Save();
+    }
 
     private void SetupWatcher()
     {
-        FileSystemWatcher watcher = new(Paths.ConfigPath, ConfigFileName);
+        var watcher = new FileSystemWatcher(Paths.ConfigPath, ConfigFileName);
         watcher.Changed += ReadConfigValues;
         watcher.Created += ReadConfigValues;
         watcher.Renamed += ReadConfigValues;
         watcher.IncludeSubdirectories = true;
         watcher.SynchronizingObject = ThreadingHelper.SynchronizingObject;
+        _configWatcher = watcher;
         watcher.EnableRaisingEvents = true;
     }
 

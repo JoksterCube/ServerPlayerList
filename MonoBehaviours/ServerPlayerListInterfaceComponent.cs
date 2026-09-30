@@ -13,10 +13,10 @@ namespace JoksterCube.ServerPlayerList.MonoBehaviours;
 
 internal class ServerPlayerListInterfaceComponent : DragNDrop
 {
+    private const int Pad = 5;
+
     private TMP_FontAsset _font = null!;
     private Color _color;
-
-    private const int Pad = 5;
 
     private bool _applyingFromConfig;
 
@@ -40,7 +40,6 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
         GetSyles();
 
         InitGameObjects();
-
         ApplyFromConfig();
 
         RegisterEvents();
@@ -50,22 +49,26 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
     {
         var visible = ShouldBeVisible();
 
-        ToggleVisibility(visible);
-
-        if (!visible) return;
-
-        if (IsShowing != PluginConfig.ShowPlayers.Value.IsOn())
-            ToggleHidden();
-
-        if (Time.time - lastRefresh >= PluginConfig.RefreshDelay.Value)
+        if (!visible)
         {
-            lastRefresh = Time.time;
-
-            Refresh();
+            ToggleVisibility(false);
+            return;
         }
 
+        var showPlayers = PluginConfig.ShowPlayers.Value.IsOn();
+        var showDetails = showPlayers && !RpcHandlers.ShouldWaitForInitialConfigSync;
+        if (!_background.gameObject.activeSelf || (showDetails && !IsShowing)
+            || Time.time - lastRefresh >= PluginConfig.RefreshDelay.Value)
+        {
+            lastRefresh = Time.time;
+            Refresh(showDetails);
+        }
+
+        SetListVisibility(showDetails);
+        ToggleVisibility(true);
         LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)_background.transform);
     }
+
     private void GetSyles()
     {
         var text = EnemyHud.instance.m_baseHudPlayer.GetComponentInChildren<TMP_Text>();
@@ -73,13 +76,25 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
         _color = text.color;
     }
 
-    private void ToggleHidden() => _container.gameObject.SetActive(!IsShowing);
-
-    private void Refresh()
+    private void SetListVisibility(bool visible)
     {
-        ServerPlayerTracker.UpdatePlayerInfo();
+        if (IsShowing == visible) return;
+        _container.gameObject.SetActive(visible);
+    }
+
+    private void Refresh(bool showPlayers)
+    {
+        if (showPlayers)
+        {
+            ServerPlayerTracker.UpdatePlayerInfo();
+            UpdateContainer();
+        }
+        else
+        {
+            ServerPlayerTracker.UpdatePlayerCount();
+        }
+
         SetCurrentlyOnlineText();
-        UpdateContainer();
     }
 
     private void SetCurrentlyOnlineText() =>
@@ -104,7 +119,7 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
     {
         for (int i = 0; i < _containerElements.Count; i++)
         {
-            _containerElements[i].PlayerInfo = infos[i];
+            _containerElements[i].SetPlayerInfo(infos[i]);
         }
     }
 
@@ -122,6 +137,7 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
         PluginConfig.HeaderTextColor.SettingChanged += OnConfigChanged;
 
         PluginConfig.HeaderFontSize.SettingChanged += OnConfigChanged;
+        PluginConfig.ShowPlayers.SettingChanged += OnShowPlayersChanged;
     }
 
     private void DeregisterEvents()
@@ -136,6 +152,25 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
         PluginConfig.HeaderTextColor.SettingChanged -= OnConfigChanged;
 
         PluginConfig.HeaderFontSize.SettingChanged -= OnConfigChanged;
+        PluginConfig.ShowPlayers.SettingChanged -= OnShowPlayersChanged;
+    }
+
+    private void OnShowPlayersChanged(object sender, EventArgs e)
+    {
+        if (PluginConfig.ShowPlayers.Value.IsOn())
+        {
+            if (!IsShowing && ShouldBeVisible() && !RpcHandlers.ShouldWaitForInitialConfigSync)
+            {
+                lastRefresh = Time.time;
+                Refresh(showPlayers: true);
+                SetListVisibility(true);
+                ToggleVisibility(true);
+                LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)_background.transform);
+            }
+            return;
+        }
+
+        SetListVisibility(false);
     }
 
     private void OnConfigChanged(object sender, EventArgs e) =>
@@ -191,7 +226,7 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
         PluginConfig.AnchorPosition.Value = anchoredPosition;
     }
 
-    private static bool ShouldBeVisible()
+    internal static bool ShouldBeVisible()
     {
         if (!Hud.instance) return false;
         if (!Hud.instance.m_rootObject || !Hud.instance.m_rootObject.activeInHierarchy) return false;
@@ -244,6 +279,7 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
 
         SetMainFromConfig();
     }
+
     private void InitBackground()
     {
         var backgroundGameObject = new GameObject(GameObjectNames.ServerPlayerListBackground, typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter), typeof(Image));

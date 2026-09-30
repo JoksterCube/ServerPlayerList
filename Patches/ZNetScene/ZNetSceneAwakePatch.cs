@@ -7,7 +7,7 @@ namespace JoksterCube.ServerPlayerList.Patches;
 [HarmonyPatch(typeof(ZNetScene), nameof(ZNetScene.Awake))]
 internal class ZNetSceneAwakePatch
 {
-    static void Postfix(ZNetScene __instance) =>
+    private static void Postfix(ZNetScene __instance) =>
         __instance.StartCoroutine(EnsureAfterHud());
 
     private static IEnumerator EnsureAfterHud()

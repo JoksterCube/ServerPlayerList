@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace JoksterCube.ServerPlayerList.Domain;
 
@@ -44,6 +43,7 @@ internal class ServerPlayerInfo
         if (!info.m_publicPosition) return float.PositiveInfinity;
         return Vector3.Distance(Player.m_localPlayer.transform.position, info.m_position);
     }
+
     private static bool IsPublicPosition(ZNet.PlayerInfo info) =>
         info.m_publicPosition;
 }

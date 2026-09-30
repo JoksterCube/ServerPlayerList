@@ -1,7 +1,6 @@
 ﻿using BepInEx.Configuration;
 using JoksterCube.ServerPlayerList.Common;
 using ServerSync;
-using TMPro;
 using UnityEngine;
 using static JoksterCube.ServerPlayerList.Settings.Constants.Groups;
 
