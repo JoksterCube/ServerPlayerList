@@ -11,9 +11,8 @@ internal static class ComponentBootstrap
     internal static void Ensure()
     {
         if (_interface) return;
+        // The component parents itself under the HUD canvas, so it lives and dies with the HUD.
         var go = new GameObject(GameObjectNames.ServerPlayerListMain, typeof(RectTransform), typeof(ServerPlayerListInterfaceComponent));
-        Object.DontDestroyOnLoad(go);
-
         _interface = go.GetComponent<ServerPlayerListInterfaceComponent>();
     }
 
