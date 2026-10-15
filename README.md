@@ -15,7 +15,7 @@ With **Server Player List**, you get a small, unobtrusive panel showing the tota
   - Compact view: only shows the online player count.  
   - Expanded view: shows names and distances.  
 - Right-click a player name in the expanded list to add or remove that player as a favorite. Favorites are highlighted, fill the row limit first, remain visible if they exceed it, and bypass local display filters.
-- Optionally hide your own row or players with private positions, filter by maximum distance, and limit visible rows. Toggle the private-position filter with **Right Control + P**; it does not change the online count.
+- Optionally hide your own row or players with private positions, filter by maximum distance, and limit visible rows. These filters do not change the online count.
 - Show a relative direction arrow for players sharing their position. Choose camera-relative or character-relative directions; `↑` means ahead of the selected reference.
 - The panel is **draggable** — click and drag to reposition it (easiest with the mouse cursor visible, e.g. in the ESC menu).  
 - The basic player list is **client-side** and does not require server installation. Optional RCON filtering requires server installation.
@@ -44,7 +44,8 @@ Some updates may change configuration sections or keys. If settings do not carry
 
 ### 🧩 Compatibility
 
-- The basic player list works on any server, even if others do not have the mod installed.
+- The basic player list works on any server without the mod, even if other players do not have it.
+- **If the server has ServerPlayerList installed, every player must have the same ServerPlayerList version.** Players without it, or with a different version, are disconnected when joining.
 - Optional RCON filtering requires ServerPlayerList on the server and matching versions on connecting clients. ValheimRcon is only needed on the server.
 
 #### RCON Player Filtering
@@ -67,10 +68,10 @@ The configuration file is `BepInEx\config\JoksterCube.ServerPlayerList.cfg`. Set
 | Group | Setting | Default | Description |
 | --- | --- | --- | --- |
 | General | Lock Configuration | On | When enabled, only server admins can change server-synced settings. **Server-synced.** |
-| General | Refresh Delay | 0.25 seconds | Time between player list refreshes. **Server-synced.** |
+| General | Refresh Delay | 0.25 seconds | Time between player list refreshes. Valid range: 0.1–10 seconds. **Server-synced.** |
 | Player List | Show Players | On | Show player rows in the expanded panel. |
 | Player List | Hide Local Player | On | Hide your own non-favorite row; does not change the online count. |
-| Player List | Hide Players with N/A Distance | Off | Hide non-favorite players who are not sharing their position. Does not change the online count. Toggle with **Right Control + P** by default. |
+| Player List | Hide Players with N/A Distance | Off | Hide non-favorite players who are not sharing their position. Does not change the online count. |
 | Player List | Ignore RCON user | Off | Hide one player matching ValheimRcon's configured server chat name when their position is private. Requires the mod on the server. **Server-synced.** |
 | Player List | Ignored users | Empty | Comma-separated, exact, case-sensitive names to hide. Each occurrence hides one matching player. **Server-synced when the mod is installed on the server.** |
 | Player List | Use Kilometers | On | Display distances of 1,000 m or more in kilometers. |
