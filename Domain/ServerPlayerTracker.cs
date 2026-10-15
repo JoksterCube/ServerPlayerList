@@ -140,10 +140,13 @@ internal static class ServerPlayerTracker
 
     private static void RemovePlayer(string name, bool requirePrivatePosition)
     {
+        var localPlayer = Player.m_localPlayer;
+        var localPlayerId = localPlayer ? localPlayer.GetZDOID() : default;
+
         var index = _players.FindIndex(player =>
             player.m_name == name
             && !player.m_publicPosition
-            && !new ServerPlayerInfo(player).IsMe);
+            && !(localPlayer && player.m_characterID == localPlayerId));
         if (index < 0 && !requirePrivatePosition)
             index = _players.FindIndex(player => player.m_name == name);
 
