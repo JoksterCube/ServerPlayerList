@@ -101,6 +101,13 @@ internal static class RpcHandlers
         _serverVersionReceived = false;
     }
 
+    // The remote version is shown in a rich-text label; strip markup and cap its length.
+    private static string SanitizeRemoteText(string text)
+    {
+        var sanitized = text.Replace("<", string.Empty).Replace(">", string.Empty);
+        return sanitized.Length > 32 ? sanitized.Substring(0, 32) : sanitized;
+    }
+
     internal static void RPC_ServerSyncModTemplate_Version(ZRpc rpc, ZPackage pkg)
     {
         string version = pkg.ReadString();
@@ -114,7 +121,7 @@ internal static class RpcHandlers
         Plugin.ModLogger.LogInfo($"Version check, local: {ModVersion},  remote: {version}");
         if (version != ModVersion)
         {
-            Plugin.ConnectionError = $"{ModName} Installed: {ModVersion}\n Needed: {version}";
+            Plugin.ConnectionError = $"{ModName} Installed: {ModVersion}\n Needed: {SanitizeRemoteText(version)}";
             if (!isServer) return;
             // Different versions - force disconnect client from server
             Plugin.ModLogger.LogWarning($"Peer ({rpc.m_socket.GetHostName()}) has incompatible version, disconnecting...");

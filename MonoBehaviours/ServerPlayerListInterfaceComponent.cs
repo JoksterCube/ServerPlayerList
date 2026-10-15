@@ -457,6 +457,8 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
         var text = playerNameGameObject.GetComponent<TextMeshProUGUI>();
         text.font = _font;
         text.color = _color;
+        // Player names come from remote peers; never interpret them as markup.
+        text.richText = false;
         text.fontStyle = FontStyles.Bold;
         text.textWrappingMode = TextWrappingModes.NoWrap;
         text.overflowMode = TextOverflowModes.Ellipsis;
