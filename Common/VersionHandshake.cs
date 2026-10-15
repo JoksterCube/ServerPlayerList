@@ -27,17 +27,12 @@ internal static class RegisterAndCheckVersion
     }
 }
 
+// Clients without the mod are allowed; only clients that reported a different version are blocked.
 [HarmonyPatch(typeof(ZNet), nameof(ZNet.RPC_PeerInfo))]
-internal static class VerifyClient
+internal static class BlockMismatchedClient
 {
-    private static bool Prefix(ZRpc rpc, ZPackage pkg, ref ZNet __instance)
-    {
-        if (!__instance.IsServer() || RpcHandlers.ValidatedPeers.Contains(rpc)) return true;
-        // Disconnect peer if they didn't send mod version at all
-        Plugin.ModLogger.LogWarning($"Peer ({rpc.m_socket.GetHostName()}) never sent version or couldn't due to previous disconnect, disconnecting");
-        rpc.Invoke("Error", 3);
-        return false; // Prevent calling underlying method
-    }
+    private static bool Prefix(ZRpc rpc, ref ZNet __instance) =>
+        !__instance.IsServer() || !RpcHandlers.RejectedPeers.Contains(rpc);
 }
 
 [HarmonyPatch(typeof(FejdStartup), nameof(FejdStartup.ShowConnectError))]
@@ -55,7 +50,7 @@ internal class ShowConnectionError
 }
 
 [HarmonyPatch(typeof(ZNet), nameof(ZNet.Disconnect))]
-internal static class RemoveDisconnectedPeerFromVerified
+internal static class RemoveDisconnectedPeerFromRejected
 {
     private static void Prefix(ZNetPeer peer, ref ZNet __instance)
     {
@@ -64,15 +59,14 @@ internal static class RemoveDisconnectedPeerFromVerified
             RpcHandlers.ResetServerVersionCheck();
             return;
         }
-        // Remove peer from validated list
-        Plugin.ModLogger.LogInfo($"Peer ({peer.m_rpc.m_socket.GetHostName()}) disconnected, removing from validated list");
-        _ = RpcHandlers.ValidatedPeers.Remove(peer.m_rpc);
+
+        _ = RpcHandlers.RejectedPeers.Remove(peer.m_rpc);
     }
 }
 
 internal static class RpcHandlers
 {
-    internal static readonly List<ZRpc> ValidatedPeers = [];
+    internal static readonly HashSet<ZRpc> RejectedPeers = [];
     private static bool _waitingForServerVersion;
     private static bool _serverVersionReceived;
     private static float _serverVersionCheckStartedAt;
@@ -93,6 +87,7 @@ internal static class RpcHandlers
         _waitingForServerVersion = true;
         _serverVersionReceived = false;
         _serverVersionCheckStartedAt = Time.realtimeSinceStartup;
+        Plugin.ConnectionError = string.Empty;
     }
 
     internal static void ResetServerVersionCheck()
@@ -123,23 +118,14 @@ internal static class RpcHandlers
         {
             Plugin.ConnectionError = $"{ModName} Installed: {ModVersion}\n Needed: {SanitizeRemoteText(version)}";
             if (!isServer) return;
-            // Different versions - force disconnect client from server
+            // Client has the mod but a different version - force disconnect client from server
             Plugin.ModLogger.LogWarning($"Peer ({rpc.m_socket.GetHostName()}) has incompatible version, disconnecting...");
+            RejectedPeers.Add(rpc);
             rpc.Invoke("Error", 3);
         }
-        else
+        else if (!isServer)
         {
-            if (!isServer)
-            {
-                // Enable mod on client if versions match
-                Plugin.ModLogger.LogInfo("Received same version from server!");
-            }
-            else
-            {
-                // Add client to validated list
-                Plugin.ModLogger.LogInfo($"Adding peer ({rpc.m_socket.GetHostName()}) to validated list");
-                ValidatedPeers.Add(rpc);
-            }
+            Plugin.ModLogger.LogInfo("Received same version from server!");
         }
     }
 }
