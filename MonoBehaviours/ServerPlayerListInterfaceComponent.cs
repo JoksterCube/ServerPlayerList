@@ -59,16 +59,19 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
 
         var showPlayers = PluginConfig.ShowPlayers.Value.IsOn();
         var showDetails = showPlayers && !RpcHandlers.ShouldWaitForInitialConfigSync;
+        var layoutChanged = false;
         if (!_background.gameObject.activeSelf || (showDetails && !IsShowing)
             || Time.time - lastRefresh >= PluginConfig.RefreshDelay.Value)
         {
             lastRefresh = Time.time;
             Refresh(showDetails);
+            layoutChanged = true;
         }
 
-        SetListVisibility(showDetails);
-        ToggleVisibility(true);
-        LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)_background.transform);
+        layoutChanged |= SetListVisibility(showDetails);
+        layoutChanged |= ToggleVisibility(true);
+        if (layoutChanged)
+            LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)_background.transform);
     }
 
     private void GetStyles()
@@ -115,10 +118,11 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
         return null;
     }
 
-    private void SetListVisibility(bool visible)
+    private bool SetListVisibility(bool visible)
     {
-        if (IsShowing == visible) return;
+        if (IsShowing == visible) return false;
         _container.gameObject.SetActive(visible);
+        return true;
     }
 
     private void Refresh(bool showPlayers)
@@ -299,10 +303,11 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
         return true;
     }
 
-    private void ToggleVisibility(bool visible)
+    private bool ToggleVisibility(bool visible)
     {
-        if (_background.gameObject.activeSelf == visible) return;
+        if (_background.gameObject.activeSelf == visible) return false;
         _background.gameObject.SetActive(visible);
+        return true;
     }
 
     private void SetHudCanvasAsParent() =>
