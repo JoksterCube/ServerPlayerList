@@ -101,5 +101,5 @@ Report issues or suggest improvements via the mod’s Thunderstore page or GitHu
 ---
 
 **Author:** JoksterCube<br>
-**Version:** 1.2.0<br>
+**Version:** 1.2.2<br>
 **License:** MIT
