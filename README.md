@@ -45,7 +45,8 @@ Some updates may change configuration sections or keys. If settings do not carry
 ### 🧩 Compatibility
 
 - The basic player list works on any server without the mod, even if other players do not have it.
-- **If the server has ServerPlayerList installed, every player must have the same ServerPlayerList version.** Players without it, or with a different version, are disconnected when joining.
+- Installing ServerPlayerList on the server does not require players to install it. Players without the mod can still join.
+- **Players who do have the mod must use the same ServerPlayerList version as the server.** A player with a different version is disconnected when joining.
 - Optional RCON filtering requires ServerPlayerList on the server and matching versions on connecting clients. ValheimRcon is only needed on the server.
 
 #### RCON Player Filtering
