@@ -55,7 +55,7 @@ internal static class Constants
             internal static readonly ConfigInfo<float> RefreshDelay = new(
                 Group,
                 "Refresh Delay",
-                "Time in seconds in bedtween refreshes.",
+                new ConfigDescription("Time in seconds between refreshes.", new AcceptableValueRange<float>(.1f, 10f)),
                 .25f,
                 true);
         }
