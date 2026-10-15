@@ -38,9 +38,6 @@ internal static class VerifyClient
         rpc.Invoke("Error", 3);
         return false; // Prevent calling underlying method
     }
-
-    private static void Postfix(ZNet __instance) =>
-        ZRoutedRpc.instance.InvokeRoutedRPC(ZRoutedRpc.instance.GetServerPeerID(), $"{ModName}RequestAdminSync", new ZPackage());
 }
 
 [HarmonyPatch(typeof(FejdStartup), nameof(FejdStartup.ShowConnectError))]
