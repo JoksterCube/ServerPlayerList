@@ -8,6 +8,7 @@ using JoksterCube.ServerPlayerList.Settings;
 using ServerSync;
 using System.IO;
 using System.Reflection;
+using UnityEngine;
 using static JoksterCube.ServerPlayerList.Settings.Constants;
 using static JoksterCube.ServerPlayerList.Settings.Constants.Plugin;
 
@@ -37,6 +38,9 @@ public class Plugin : BaseUnityPlugin
 
     private readonly Harmony _harmony = new(ModGUID);
 
+    private const float RconNameCheckInterval = 1f;
+    private float _nextRconNameCheck;
+
     private void Awake()
     {
         PluginConfig.Build(Config, ConfigSync);
@@ -48,7 +52,12 @@ public class Plugin : BaseUnityPlugin
 
     private void Update()
     {
-        UpdateRconPlayerName();
+        if (Time.unscaledTime >= _nextRconNameCheck)
+        {
+            _nextRconNameCheck = Time.unscaledTime + RconNameCheckInterval;
+            UpdateRconPlayerName();
+        }
+
         InputManager.Update(this);
     }
 
