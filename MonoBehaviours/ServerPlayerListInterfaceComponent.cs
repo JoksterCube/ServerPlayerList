@@ -166,7 +166,6 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
 
     private void RegisterEvents()
     {
-        OnPositionChanged += Save;
         OnDragEnded += Save;
 
         PluginConfig.AnchorPosition.SettingChanged += OnConfigChanged;
@@ -182,7 +181,6 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
 
     private void DeregisterEvents()
     {
-        OnPositionChanged -= Save;
         OnDragEnded -= Save;
 
         PluginConfig.AnchorPosition.SettingChanged -= OnConfigChanged;
