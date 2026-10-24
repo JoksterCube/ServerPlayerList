@@ -28,7 +28,7 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
 
     private TMP_Text _headerText = null!;
     private Transform _container = null!;
-    private readonly List<PlayerInfoElement> _containerElements = new();
+    private readonly List<PlayerInfoElement> _containerElements = [];
 
     private float lastRefresh;
     private bool IsShowing => _container.gameObject.activeSelf;
@@ -74,48 +74,12 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
             LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)_background.transform);
     }
 
+    // The panel is only created once the HUD exists, so its hover text is always available.
     private void GetStyles()
     {
-        TMP_Text? text = null;
-        if (EnemyHud.instance && EnemyHud.instance.m_baseHudPlayer)
-            text = FindTextWithFont(EnemyHud.instance.m_baseHudPlayer);
-
-        if (!text && Hud.instance && Hud.instance.m_rootObject)
-            text = FindTextWithFont(Hud.instance.m_rootObject);
-
-        if (!text)
-        {
-            foreach (var candidate in Resources.FindObjectsOfTypeAll<TMP_Text>())
-            {
-                if (candidate && candidate.font)
-                {
-                    text = candidate;
-                    break;
-                }
-            }
-        }
-
-        if (!text)
-        {
-            Plugin.ModLogger.LogWarning("Could not find a loaded TextMeshPro font asset for the player list.");
-            _font = TMP_Settings.defaultFontAsset;
-            _color = Color.white;
-            return;
-        }
-
+        var text = Hud.instance.m_hoverName;
         _font = text.font;
         _color = text.color;
-    }
-
-    private static TMP_Text? FindTextWithFont(GameObject root)
-    {
-        foreach (var text in root.GetComponentsInChildren<TMP_Text>(true))
-        {
-            if (text && text.font)
-                return text;
-        }
-
-        return null;
     }
 
     private bool SetListVisibility(bool visible)
@@ -329,78 +293,35 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
         _mainRect.anchorMax = Vector2.one;
         _mainRect.pivot = Vector2.up;
 
-        var layout = gameObject.AddComponent<VerticalLayoutGroup>();
-        layout.childControlWidth = true;
-        layout.childControlHeight = false;
-        layout.childForceExpandWidth = true;
-        layout.childForceExpandHeight = false;
-
-        var fitter = gameObject.AddComponent<ContentSizeFitter>();
-        fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
-        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        AddLayout<VerticalLayoutGroup>(gameObject);
+        FitHeight(gameObject);
 
         SetMainFromConfig();
     }
 
     private void InitBackground()
     {
-        var backgroundGameObject = new GameObject(GameObjectNames.ServerPlayerListBackground, typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter), typeof(Image));
-        backgroundGameObject.transform.SetParent(transform, false);
+        var backgroundGameObject = CreateChild(GameObjectNames.ServerPlayerListBackground, transform);
+        AddLayout<VerticalLayoutGroup>(backgroundGameObject, spacing: Pad, padding: Pad);
+        FitHeight(backgroundGameObject);
 
-        var layout = backgroundGameObject.GetComponent<VerticalLayoutGroup>();
-        layout.childControlWidth = true;
-        layout.childControlHeight = false;
-        layout.childForceExpandWidth = true;
-        layout.childForceExpandHeight = false;
-        layout.padding = new RectOffset(Pad, Pad, Pad, Pad);
-        layout.spacing = Pad;
-
-        var fitter = backgroundGameObject.GetComponent<ContentSizeFitter>();
-        fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
-        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-        _background = backgroundGameObject.GetComponent<Image>();
+        _background = backgroundGameObject.AddComponent<Image>();
         SetBackgroundFromConfig();
     }
 
     private void InitHeader()
     {
-        var headerGameObject = new GameObject(GameObjectNames.ServerPlayerListHeader, typeof(RectTransform));
-        headerGameObject.SetActive(false);
-        headerGameObject.AddComponent<ContentSizeFitter>();
-        headerGameObject.AddComponent<TextMeshProUGUI>();
-        headerGameObject.transform.SetParent(_background.transform, false);
-
-        var fitter = headerGameObject.GetComponent<ContentSizeFitter>();
-        fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
-        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-        _headerText = headerGameObject.GetComponent<TextMeshProUGUI>();
-        _headerText.font = _font;
-        _headerText.fontStyle = FontStyles.Bold;
-        _headerText.textWrappingMode = TextWrappingModes.NoWrap;
-        _headerText.alignment = TextAlignmentOptions.Top;
-
+        _headerText = CreateText(GameObjectNames.ServerPlayerListHeader, _background.transform, TextAlignmentOptions.Top);
         SetHeaderFromConfig();
-        headerGameObject.SetActive(true);
     }
 
     private void InitListContainer()
     {
-        var containerGameObject = new GameObject(GameObjectNames.ServerPlayerListContainer, typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
+        var containerGameObject = CreateChild(GameObjectNames.ServerPlayerListContainer, _background.transform);
+        AddLayout<VerticalLayoutGroup>(containerGameObject);
+        FitHeight(containerGameObject);
+
         _container = containerGameObject.transform;
-        _container.SetParent(_background.transform, false);
-
-        var layout = containerGameObject.GetComponent<VerticalLayoutGroup>();
-        layout.childControlWidth = true;
-        layout.childControlHeight = false;
-        layout.childForceExpandWidth = true;
-        layout.childForceExpandHeight = false;
-        layout.spacing = 0f;
-
-        var fitter = containerGameObject.GetComponent<ContentSizeFitter>();
-        fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
-        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
     }
 
     private void SpawnElements(int number)
@@ -413,61 +334,23 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
 
     private PlayerInfoElement SpawnElement()
     {
-        var info = SpawnElementMain();
-        info.Name = SpawnElementName(info.transform);
-        info.Distance = SpawnElementDistance(info.transform);
-        info.Name.gameObject.GetComponent<FavoritePlayerName>().Initialize(info);
+        var elementGameObject = CreateChild(GameObjectNames.ServerPlayerListPlayerInfo, _container);
+        AddLayout<HorizontalLayoutGroup>(elementGameObject);
+        FitHeight(elementGameObject);
+        var layoutElement = elementGameObject.AddComponent<LayoutElement>();
+
+        var info = elementGameObject.AddComponent<PlayerInfoElement>();
+        info.Name = CreateListText(GameObjectNames.ServerPlayerListPlayerName, info.transform, TextAlignmentOptions.Left);
+        info.Name.color = _color;
+        // Player names come from remote peers; never interpret them as markup.
+        info.Name.richText = false;
+        info.Name.gameObject.AddComponent<FavoritePlayerName>().Initialize(info);
+        info.Distance = CreateListText(GameObjectNames.ServerPlayerListDistance, info.transform, TextAlignmentOptions.Right);
+
         info.FavoriteChanged += OnFavoriteChanged;
-        info.GetComponent<LayoutElement>().preferredHeight = GetPreferredRowHeight(info);
+        layoutElement.preferredHeight = GetPreferredRowHeight(info);
 
         return info;
-    }
-
-    private PlayerInfoElement SpawnElementMain()
-    {
-        var elementGameObject = new GameObject(GameObjectNames.ServerPlayerListPlayerInfo, typeof(RectTransform), typeof(HorizontalLayoutGroup), typeof(ContentSizeFitter), typeof(LayoutElement), typeof(PlayerInfoElement));
-        elementGameObject.transform.SetParent(_container, false);
-
-        var layout = elementGameObject.GetComponent<HorizontalLayoutGroup>();
-        layout.childControlWidth = true;
-        layout.childControlHeight = false;
-        layout.childForceExpandWidth = true;
-        layout.childForceExpandHeight = false;
-
-        var fitter = elementGameObject.GetComponent<ContentSizeFitter>();
-        fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
-        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-        return elementGameObject.GetComponent<PlayerInfoElement>();
-    }
-
-    private TMP_Text SpawnElementName(Transform element)
-    {
-        var playerNameGameObject = new GameObject(GameObjectNames.ServerPlayerListPlayerName, typeof(RectTransform));
-        playerNameGameObject.SetActive(false);
-        playerNameGameObject.AddComponent<ContentSizeFitter>();
-        playerNameGameObject.AddComponent<TextMeshProUGUI>();
-        playerNameGameObject.AddComponent<FavoritePlayerName>();
-        playerNameGameObject.transform.SetParent(element, false);
-
-        var fitter = playerNameGameObject.GetComponent<ContentSizeFitter>();
-        fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
-        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-        var text = playerNameGameObject.GetComponent<TextMeshProUGUI>();
-        text.font = _font;
-        text.color = _color;
-        // Player names come from remote peers; never interpret them as markup.
-        text.richText = false;
-        text.fontStyle = FontStyles.Bold;
-        text.textWrappingMode = TextWrappingModes.NoWrap;
-        text.overflowMode = TextOverflowModes.Ellipsis;
-        text.alignment = TextAlignmentOptions.Left;
-
-        text.fontSize = PluginConfig.ListFontSize.Value;
-        playerNameGameObject.SetActive(true);
-
-        return text;
     }
 
     private void OnFavoriteChanged()
@@ -477,29 +360,55 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
         LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)_background.transform);
     }
 
-    private TMP_Text SpawnElementDistance(Transform element)
+    private TMP_Text CreateListText(string name, Transform parent, TextAlignmentOptions alignment)
     {
-        var playerNameGameObject = new GameObject(GameObjectNames.ServerPlayerListDistance, typeof(RectTransform));
-        playerNameGameObject.SetActive(false);
-        playerNameGameObject.AddComponent<ContentSizeFitter>();
-        playerNameGameObject.AddComponent<TextMeshProUGUI>();
-        playerNameGameObject.transform.SetParent(element, false);
+        var text = CreateText(name, parent, alignment);
+        text.overflowMode = TextOverflowModes.Ellipsis;
+        text.fontSize = PluginConfig.ListFontSize.Value;
+        return text;
+    }
 
-        var fitter = playerNameGameObject.GetComponent<ContentSizeFitter>();
-        fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
-        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+    private TMP_Text CreateText(string name, Transform parent, TextAlignmentOptions alignment)
+    {
+        var textGameObject = new GameObject(name, typeof(RectTransform));
+        // Set the font before TextMeshPro wakes up, so it never falls back to a missing default font.
+        textGameObject.SetActive(false);
+        textGameObject.transform.SetParent(parent, false);
+        FitHeight(textGameObject);
 
-        var text = playerNameGameObject.GetComponent<TextMeshProUGUI>();
+        var text = textGameObject.AddComponent<TextMeshProUGUI>();
         text.font = _font;
         text.fontStyle = FontStyles.Bold;
         text.textWrappingMode = TextWrappingModes.NoWrap;
-        text.overflowMode = TextOverflowModes.Ellipsis;
-        text.alignment = TextAlignmentOptions.Right;
+        text.alignment = alignment;
 
-        text.fontSize = PluginConfig.ListFontSize.Value;
-        playerNameGameObject.SetActive(true);
-
+        textGameObject.SetActive(true);
         return text;
+    }
+
+    private static GameObject CreateChild(string name, Transform parent)
+    {
+        var child = new GameObject(name, typeof(RectTransform));
+        child.transform.SetParent(parent, false);
+        return child;
+    }
+
+    private static void AddLayout<T>(GameObject target, float spacing = 0f, int padding = 0) where T : HorizontalOrVerticalLayoutGroup
+    {
+        var layout = target.AddComponent<T>();
+        layout.childControlWidth = true;
+        layout.childControlHeight = false;
+        layout.childForceExpandWidth = true;
+        layout.childForceExpandHeight = false;
+        layout.spacing = spacing;
+        layout.padding = new RectOffset(padding, padding, padding, padding);
+    }
+
+    private static void FitHeight(GameObject target)
+    {
+        var fitter = target.AddComponent<ContentSizeFitter>();
+        fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
     }
 
     private void DeleteElements(int number)
