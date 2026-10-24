@@ -14,8 +14,6 @@ internal static class PluginConfig
     internal static ConfigEntry<Toggle> HideLocalPlayer = null!;
     internal static ConfigEntry<Toggle> HideNaPlayers = null!;
 
-    internal static ConfigEntry<Toggle> IgnoreRconUser = null!;
-
     internal static ConfigEntry<string> IgnoredUsers = null!;
 
     internal static ConfigEntry<float> RefreshDelay = null!;
@@ -53,8 +51,6 @@ internal static class PluginConfig
         ShowPlayers = ConfigOptions.Config(PlayerList.ShowPlayers);
         HideLocalPlayer = ConfigOptions.Config(PlayerList.HideLocalPlayer);
         HideNaPlayers = ConfigOptions.Config(PlayerList.HideNaPlayers);
-
-        IgnoreRconUser = ConfigOptions.Config(PlayerList.IgnoreRconUser);
 
         IgnoredUsers = ConfigOptions.Config(PlayerList.IgnoredUsers);
 

@@ -3,22 +3,24 @@
 ## See who’s online and how far they are from you!
 
 Ever wondered how many players are currently online on your server, or how far your friends are from you?  
-With **Server Player List**, you get a small, unobtrusive panel showing the total number of online players — and, if they’re sharing their location, their names and distances too.
+With **Server Player List**, you get a small, unobtrusive panel showing the number of online players, their names and, for players sharing their location, how far away they are and in which direction.
 
 ---
 
 ### 🧭 Features
 
-- Displays **number of online players** in a small HUD panel.  
-- Shows **player names and distances** (only for players who share their location).  
-- Toggle between compact and expanded view using **Right Control + O**.  
+- Displays the **number of online players** in a small HUD panel.  
+- Lists **player names**, with **distances** for players who share their location. Players with a private position show `N/A`.  
+- Distances are color-coded: green under 100 m, yellow under 400 m, orange under 1,200 m, red under 2,400 m, and grey beyond that or `N/A`.
+- Shows a **direction arrow** for players sharing their position, relative to your camera or your character; `↑` means ahead.
+- Toggle between compact and expanded view using **Right Control + O**. The shortcut is ignored while typing or in game menus.  
   - Compact view: only shows the online player count.  
   - Expanded view: shows names and distances.  
-- Right-click a player name in the expanded list to add or remove that player as a favorite. Favorites are highlighted, fill the row limit first, remain visible if they exceed it, and bypass local display filters.
+- **Right-click** a player name in the expanded list to add or remove them as a favorite. Favorites are highlighted, listed first, and always shown while online.
 - Optionally hide your own row or players with private positions, filter by maximum distance, and limit visible rows. These filters do not change the online count.
-- Show a relative direction arrow for players sharing their position. Choose camera-relative or character-relative directions; `↑` means ahead of the selected reference.
-- The panel is **draggable** — click and drag to reposition it (easiest with the mouse cursor visible, e.g. in the ESC menu).  
-- The basic player list is **client-side** and does not require server installation. Optional RCON filtering requires server installation.
+- The panel is **draggable**: click and drag to reposition it (easiest with the mouse cursor visible, e.g. in the ESC menu).  
+- The panel hides itself while the map is open and while you are dead, sleeping or teleporting.
+- Works on any server without server installation. Installing it on the server adds synced settings and automatic RCON player filtering.
 
 ---
 
@@ -28,70 +30,75 @@ With **Server Player List**, you get a small, unobtrusive panel showing the tota
 
 ---
 
-## ⚙️ Manual Installation Instructions
-*You must have BepInEx installed.*
+### ⚙️ Installation
+
+**Recommended:** install with a mod manager such as r2modman or Thunderstore Mod Manager.
+
+**Manual (client):** *you must have BepInEx installed.*
 
 1. Locate your Valheim game folder.  
 2. Extract the contents of the archive into the `BepInEx\plugins` folder.  
 3. Launch the game and look for the Server Player List panel.  
 4. Adjust settings in `BepInEx\config\JoksterCube.ServerPlayerList.cfg` if needed.
 
-### Configuration Updates
-
-Some updates may change configuration sections or keys. If settings do not carry over or behave as expected after updating, back up and delete `BepInEx\config\JoksterCube.ServerPlayerList.cfg`, then relaunch the game to generate a fresh config. This resets all custom settings.
+**Server (optional):** put `ServerPlayerList.dll` in the server's `BepInEx\plugins` folder. Players do not need to install the mod to join.
 
 ---
 
 ### 🧩 Compatibility
 
-- The basic player list works on any server without the mod, even if other players do not have it.
+- The mod works on any server, including servers without it, even if other players do not have it.
 - Installing ServerPlayerList on the server does not require players to install it. Players without the mod can still join.
 - **Players who do have the mod must use the same ServerPlayerList version as the server.** A player with a different version is disconnected when joining.
-- Optional RCON filtering requires ServerPlayerList on the server and matching versions on connecting clients. ValheimRcon is only needed on the server.
+
+---
+
+### 🔧 Configuration
+
+The configuration file is `BepInEx\config\JoksterCube.ServerPlayerList.cfg`. Settings marked **Server-synced** are controlled by the server when ServerPlayerList is installed there; all others are local to your client.
+
+Some updates change configuration sections or keys. If settings do not carry over or behave as expected after updating, back up and delete the configuration file, then relaunch the game to generate a fresh one. This resets all custom settings.
 
 #### RCON Player Filtering
 
-This feature supports [ValheimRcon by Tristan-dvr](https://thunderstore.io/c/valheim/p/Tristan/ValheimRcon/) (`org.tristan.rcon`).
+Supports [ValheimRcon by Tristan-dvr](https://thunderstore.io/c/valheim/p/Tristan/ValheimRcon/) (`org.tristan.rcon`).
 
-- **Setup:** On the server, enable `Ignore RCON user` under `Player List`. Requires ValheimRcon on the server and matching ServerPlayerList versions on clients.
-- **Effect:** Hides one exact match for ValheimRcon's `[3. Chat]` / `Server name` when that player's position is private (`N/A`). Only the name is synced; RCON credentials stay on the server.
-- **Note:** A same-name player with a private position may be hidden. Reload ValheimRcon after changing its server name.
+- **Setup:** None. When ServerPlayerList and ValheimRcon are both installed on the server, ValheimRcon's player is hidden automatically.
+- **Effect:** Hides one player named exactly like ValheimRcon's `[3. Chat]` / `Server name` (default `Server`) when that player's position is private (`N/A`). Only the name is synced; RCON credentials stay on the server.
+- **Note:** A real player with the same name and a private position may be hidden instead. Restart the server after changing ValheimRcon's server name.
 
 #### Ignore List
 
-- **Setup:** Enter comma-separated names under `Player List` → `Ignored users` (for example, `Server, AnotherPlayer`). Empty by default; uses the server's setting when the mod is installed there, otherwise your local setting.
+- **Setup:** Enter comma-separated names under `[2 - Player List]` → `Ignored users` (for example, `AltAccount, AnotherPlayer`). Empty by default. Uses the server's setting when the mod is installed there, otherwise your local setting.
 - **Matching:** Exact and case-sensitive; surrounding spaces are ignored. Each name occurrence hides one player from the list and count, preferring `N/A` entries. Applied after RCON filtering; can also hide your own entry.
 
 #### Configuration Reference
 
-The configuration file is `BepInEx\config\JoksterCube.ServerPlayerList.cfg`. Settings marked **Server-synced** are controlled by the server when ServerPlayerList is installed there; all others are local to your client.
-
-| Group | Setting | Default | Description |
+| Section | Setting | Default | Description |
 | --- | --- | --- | --- |
-| General | Lock Configuration | On | When enabled, only server admins can change server-synced settings. **Server-synced.** |
-| General | Refresh Delay | 0.25 seconds | Time between player list refreshes. Valid range: 0.1–10 seconds. **Server-synced.** |
-| Player List | Show Players | On | Show player rows in the expanded panel. |
-| Player List | Hide Local Player | On | Hide your own non-favorite row; does not change the online count. |
-| Player List | Hide Players with N/A Distance | Off | Hide non-favorite players who are not sharing their position. Does not change the online count. |
-| Player List | Ignore RCON user | Off | Hide one player matching ValheimRcon's configured server chat name when their position is private. Requires the mod on the server. **Server-synced.** |
-| Player List | Ignored users | Empty | Comma-separated, exact, case-sensitive names to hide. Each occurrence hides one matching player. **Server-synced when the mod is installed on the server.** |
-| Player List | Use Kilometers | On | Display distances of 1,000 m or more in kilometers. |
-| Player List | Maximum Player Distance | 0 m | Hide non-favorite players beyond this distance. `0` disables the filter. Valid range: 0–20,000 m. |
-| Player List | Maximum Visible Players | 0 | Maximum player rows to display. Favorites fill the limit first and all remain visible if they exceed it. `0` means unlimited; valid range: 0–20. |
-| Player List | Favorite Players | Empty | Comma-separated, exact, case-sensitive names. Favorites remain visible while online, bypass local display filters, and remain visible beyond the row limit. Explicit ignored-user and RCON filters still apply. The local player, when shown, remains first. |
-| Player List | Show Player Direction | On | Show a direction arrow for players sharing their position. |
-| Player List | Direction Reference | Camera | Choose camera-relative or character-relative direction. Camera mode falls back to character facing if the main camera is unavailable. |
-| Player List | Local Player Tag | U+16DD symbol | Text shown in place of your distance when your row is visible. Leave empty to hide it. |
-| Appearance | Anchor Position | (-239.75, -243.25) | HUD panel offset from the upper-right corner. Drag the panel to change and save it. |
-| Appearance | Width | 199.5 | Width of the panel. |
-| Appearance | Background Color | RGBA (0, 0, 0, 0.3) | Panel background color. |
-| Appearance | Header Text Color | White | Header text color. |
-| Appearance | Header Highlight Text Color | RGBA (1, 0.84, 0, 1) | Color of the online player count in the header. |
-| Appearance | Header Font Size | 28 | Header text size. |
-| Appearance | List Font Size | 22 | Player row text size. |
-| Appearance | Favorite Player Name Color | RGBA (1, 0.84, 0, 1) | Name color used to identify favorite players. |
-| Appearance | Header Text | Currently online: | Text displayed before the online player count. |
-| Inputs | Show List Keyboard shortcut | Right Control + O | Toggle the player list between compact and expanded modes. |
+| 1 - General | Lock Configuration | On | When enabled, only server admins can change server-synced settings. **Server-synced.** |
+| 1 - General | Refresh Delay | 0.25 seconds | Time between player list refreshes. Valid range: 0.1–10 seconds. **Server-synced.** |
+| 2 - Player List | Show Players | On | Expanded view: show player rows below the online count. Off shows only the count. Toggled with the Show List shortcut. |
+| 2 - Player List | Hide Local Player | On | Hide your own non-favorite row; does not change the online count. |
+| 2 - Player List | Hide Players with N/A Distance | Off | Hide non-favorite players who are not sharing their position. Does not change the online count. |
+| 2 - Player List | Ignored users | Empty | Comma-separated, exact, case-sensitive names to hide. Each occurrence hides one matching player. **Server-synced when the mod is installed on the server.** |
+| 2 - Player List | Use Kilometers | On | Display distances of 1,000 m or more in kilometers. |
+| 2 - Player List | Maximum Player Distance | 0 m | Hide non-favorite players beyond this distance. Players with `N/A` distance are also hidden while this is set. `0` disables the filter. Valid range: 0–20,000 m. |
+| 2 - Player List | Maximum Visible Players | 0 | Maximum player rows to display. Favorites fill the limit first and all remain visible if they exceed it. `0` means unlimited; valid range: 0–20. |
+| 2 - Player List | Favorite Players | Empty | Comma-separated, exact, case-sensitive names. Favorites remain visible while online, bypass local display filters, and remain visible beyond the row limit. Ignored-user and RCON filters still apply. Your own row, when shown, stays first. |
+| 2 - Player List | Show Player Direction | On | Show a direction arrow for players sharing their position. |
+| 2 - Player List | Direction Reference | Camera | Choose camera-relative or character-relative direction. Camera mode falls back to character facing if the main camera is unavailable. |
+| 2 - Player List | Local Player Tag | ᛝ (U+16DD) | Text shown in place of your distance when your row is visible. Leave empty to hide it. |
+| 3 - Appearance | Anchor Position | (-239.75, -243.25) | Panel offset from the upper-right corner of the screen. Drag the panel to change and save it. |
+| 3 - Appearance | Width | 199.5 | Width of the panel. |
+| 3 - Appearance | Background Color | RGBA (0, 0, 0, 0.3) | Panel background color. |
+| 3 - Appearance | Header Text Color | White | Header text color. |
+| 3 - Appearance | Header Highlight Text Color | RGBA (1, 0.84, 0, 1) | Color of the online player count in the header. |
+| 3 - Appearance | Header Font Size | 28 | Header text size. |
+| 3 - Appearance | List Font Size | 22 | Player row text size. |
+| 3 - Appearance | Favorite Player Name Color | RGBA (1, 0.84, 0, 1) | Name color used to identify favorite players. |
+| 3 - Appearance | Header Text | Currently online: | Text displayed before the online player count. |
+| 4 - Inputs | Show List Keyboard shortcut | Right Control + O | Toggle the player list between compact and expanded modes. |
 
 ---
 
@@ -102,5 +109,5 @@ Report issues or suggest improvements via the mod’s Thunderstore page or GitHu
 ---
 
 **Author:** JoksterCube<br>
-**Version:** 1.2.2<br>
+**Version:** 1.3.0<br>
 **License:** MIT

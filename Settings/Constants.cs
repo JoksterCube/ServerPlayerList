@@ -17,10 +17,10 @@ internal static class Constants
     internal static class Plugin
     {
         internal const string ModName = "ServerPlayerList";
-        internal const string ModVersion = "1.2.2";
+        internal const string ModVersion = "1.3.0";
         internal const string Author = "JoksterCube";
         internal const string ModGUID = $"{Author}.{ModName}";
-        internal const string Description = "Display currently online player number and information.";
+        internal const string Description = "Shows how many players are online, with their names, distances and directions.";
         internal const string Copyright = "Copyright ©  2025";
         internal const string Guid = "39da2684-0d87-45f0-9265-a09885c0b1ba";
 
@@ -67,7 +67,7 @@ internal static class Constants
             internal static readonly ConfigInfo<Toggle> ShowPlayers = new(
                 Group,
                 "Show Players",
-                "Show online player list.",
+                "Expanded view: show player rows below the online count. Off shows only the count. Toggled with the Show List keyboard shortcut.",
                 Toggle.On,
                 false);
 
@@ -84,13 +84,6 @@ internal static class Constants
                 "Hide non-favorite players who are not sharing their position from the expanded list. Does not affect the online player count.",
                 Toggle.Off,
                 false);
-
-            internal static readonly ConfigInfo<Toggle> IgnoreRconUser = new(
-                Group,
-                "Ignore RCON user",
-                "Hide one player matching the configured server chat name of ValheimRcon by Tristan-dvr that would show N/A distance. Requires ServerPlayerList and ValheimRcon on the server. A real player with the same name and a private position may be hidden instead.",
-                Toggle.Off,
-                true);
 
             internal static readonly ConfigInfo<string> IgnoredUsers = new(
                 Group,
@@ -109,7 +102,7 @@ internal static class Constants
             internal static readonly ConfigInfo<float> MaxPlayerDistance = new(
                 Group,
                 "Maximum Player Distance",
-                new ConfigDescription("Hide non-favorite players farther than this distance in meters. Set to 0 to disable.", new AcceptableValueRange<float>(0, 20000)),
+                new ConfigDescription("Hide non-favorite players farther than this distance in meters. Players with N/A distance are also hidden while this is set. Set to 0 to disable.", new AcceptableValueRange<float>(0, 20000)),
                 0,
                 false);
 
@@ -156,14 +149,14 @@ internal static class Constants
             internal static readonly ConfigInfo<Vector2> AnchorPosition = new(
                 Group,
                 "Anchor Position",
-                "Offset of the Server Player list view from the upper-right corner.",
+                "Offset of the panel from the upper-right corner of the screen. Drag the panel to change it.",
                 new(-239.75f, -243.25f),
                 false);
 
             internal static readonly ConfigInfo<float> Width = new(
                 Group,
                 "Width",
-                "Width of the currently online panel.",
+                "Width of the panel.",
                 199.5f,
                 false);
 
@@ -184,7 +177,7 @@ internal static class Constants
             internal static readonly ConfigInfo<Color> HeaderHighlightTextColor = new(
                 Group,
                 "Header Highlight Text Color",
-                "Highlight color of the header text.",
+                "Color of the online player count in the header.",
                 new Color(1, .84f, 0, 1),
                 false);
 
@@ -198,7 +191,7 @@ internal static class Constants
             internal static readonly ConfigInfo<int> ListFontSize = new(
                 Group,
                 "List Font Size",
-                "Size of the lsit font.",
+                "Size of the player row font.",
                 22,
                 false);
 
@@ -212,7 +205,7 @@ internal static class Constants
             internal static readonly ConfigInfo<string> HeaderText = new(
                 Group,
                 "Header Text",
-                "Text going before the number of players currently online.",
+                "Text shown before the online player count.",
                 "Currently online:",
                 false);
         }
@@ -224,7 +217,7 @@ internal static class Constants
             internal static readonly ConfigInfo<KeyboardShortcut> ShowListKeyboardShortcut = new(
                 Group,
                 "Show List Keyboard shortcut",
-                "Input used to display online player list.",
+                "Toggle between the compact view (count only) and the expanded view (player rows). Ignored while typing or in game menus.",
                 new(KeyCode.O, KeyCode.RightControl),
                 false);
         }

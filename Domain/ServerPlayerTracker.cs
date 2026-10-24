@@ -66,7 +66,7 @@ internal static class ServerPlayerTracker
     {
         if (!ZNet.instance) return;
 
-        var rconName = PluginConfig.IgnoreRconUser.IsOn() ? Plugin.RconPlayerName.Value : string.Empty;
+        var rconName = Plugin.RconPlayerName.Value;
         _players = ZNet.instance.GetPlayerList().ToList();
         if (!string.IsNullOrEmpty(rconName))
             RemovePlayer(rconName, requirePrivatePosition: true);
@@ -90,7 +90,7 @@ internal static class ServerPlayerTracker
         var removedPlayers = new bool[players.Count];
         var removedCount = 0;
 
-        var rconName = PluginConfig.IgnoreRconUser.IsOn() ? Plugin.RconPlayerName.Value : string.Empty;
+        var rconName = Plugin.RconPlayerName.Value;
         if (!string.IsNullOrEmpty(rconName))
         {
             var index = FindPlayerIndex(players, removedPlayers, rconName, requirePrivatePosition: true, skipLocalPlayer: true);

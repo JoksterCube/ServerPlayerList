@@ -66,8 +66,7 @@ public class Plugin : BaseUnityPlugin
         if (!ZNet.instance || !ZNet.instance.IsServer()) return;
 
         var name = string.Empty;
-        if (PluginConfig.IgnoreRconUser.IsOn()
-            && Chainloader.PluginInfos.TryGetValue("org.tristan.rcon", out var rcon)
+        if (Chainloader.PluginInfos.TryGetValue("org.tristan.rcon", out var rcon)
             && rcon.Instance
             && rcon.Instance.Config.TryGetEntry<string>("3. Chat", "Server name", out var serverName))
         {
