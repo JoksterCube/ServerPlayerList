@@ -198,6 +198,10 @@
     <Copy SourceFiles="$(TargetDir)$(AssemblyName).dll" DestinationFolder="$(CopyOutputDLLPath2)" OverwriteReadOnlyFiles="true" Condition="Exists('$(CopyOutputDLLPath2)')" />
     <Copy SourceFiles="$(TargetDir)$(AssemblyName).dll" DestinationFolder="$(CopyOutputDLLPath3)" OverwriteReadOnlyFiles="true" Condition="Exists('$(CopyOutputDLLPath3)')" />
   </Target>
+  <Target Name="CopyBuildOutputToShared" AfterTargets="CopyOutputDLL" Condition="'$(SharedBuildOutputPath)' != ''">
+    <MakeDir Directories="$(SharedBuildOutputPath)" />
+    <Copy SourceFiles="$(TargetDir)$(AssemblyName).dll" DestinationFolder="$(SharedBuildOutputPath)" SkipUnchangedFiles="true" />
+  </Target>
   <Target Name="CopyReadMeToTSFolder" AfterTargets="CopyOutputDLL" Condition=" ('$(Configuration)|$(Platform)' == 'Release|AnyCPU') And ('$(OS)' == 'Windows_NT') ">
     <Warning Text="README.md not found in project directory. A default README.md file will be created for the Thunderstore package" Condition="!Exists('README.md')" />
     <WriteLinesToFile File="README.md" Lines="Default Readme file from one of Azumatt's Templates. Replace this with actual content." Overwrite="false" Condition="!Exists('README.md')" />
