@@ -71,16 +71,21 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
         layoutChanged |= SetListVisibility(showDetails);
         layoutChanged |= ToggleVisibility(true);
         if (layoutChanged)
-            LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)_background.transform);
+            RebuildLayout();
     }
 
-    // The panel is only created once the HUD exists, so its hover text is always available.
+    // Match the player name shown above characters. The panel is only created once EnemyHud exists,
+    // and its player template is inactive, so inactive children must be included.
     private void GetStyles()
     {
-        var text = Hud.instance.m_hoverName;
+        var text = EnemyHud.instance.m_baseHudPlayer.GetComponentInChildren<TMP_Text>(true);
         _font = text.font;
         _color = text.color;
     }
+
+    // Rebuild from the panel root so its layout group also positions the background,
+    // otherwise the background stays at its default position until Unity's own layout pass.
+    private void RebuildLayout() => LayoutRebuilder.ForceRebuildLayoutImmediate(_mainRect);
 
     private bool SetListVisibility(bool visible)
     {
@@ -172,7 +177,7 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
                 Refresh(showPlayers: true);
                 SetListVisibility(true);
                 ToggleVisibility(true);
-                LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)_background.transform);
+                RebuildLayout();
             }
             return;
         }
@@ -311,7 +316,7 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
 
     private void InitHeader()
     {
-        _headerText = CreateText(GameObjectNames.ServerPlayerListHeader, _background.transform, TextAlignmentOptions.Top);
+        _headerText = CreateText(GameObjectNames.ServerPlayerListHeader, _background.transform, TextAlignmentOptions.Top, PluginConfig.HeaderFontSize.Value);
         SetHeaderFromConfig();
     }
 
@@ -357,21 +362,21 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
     {
         lastRefresh = Time.time;
         Refresh(showPlayers: true);
-        LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)_background.transform);
+        RebuildLayout();
     }
 
     private TMP_Text CreateListText(string name, Transform parent, TextAlignmentOptions alignment)
     {
-        var text = CreateText(name, parent, alignment);
+        var text = CreateText(name, parent, alignment, PluginConfig.ListFontSize.Value);
         text.overflowMode = TextOverflowModes.Ellipsis;
-        text.fontSize = PluginConfig.ListFontSize.Value;
         return text;
     }
 
-    private TMP_Text CreateText(string name, Transform parent, TextAlignmentOptions alignment)
+    private TMP_Text CreateText(string name, Transform parent, TextAlignmentOptions alignment, float fontSize)
     {
         var textGameObject = new GameObject(name, typeof(RectTransform));
-        // Set the font before TextMeshPro wakes up, so it never falls back to a missing default font.
+        // Configure the text before TextMeshPro wakes up. Its Awake falls back to a missing default font,
+        // and while the font size is unset it also resets wrapping and other settings to TMP defaults.
         textGameObject.SetActive(false);
         textGameObject.transform.SetParent(parent, false);
         FitHeight(textGameObject);
@@ -381,6 +386,7 @@ internal class ServerPlayerListInterfaceComponent : DragNDrop
         text.fontStyle = FontStyles.Bold;
         text.textWrappingMode = TextWrappingModes.NoWrap;
         text.alignment = alignment;
+        text.fontSize = fontSize;
 
         textGameObject.SetActive(true);
         return text;

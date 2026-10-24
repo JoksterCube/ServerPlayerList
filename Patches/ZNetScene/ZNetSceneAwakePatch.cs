@@ -18,7 +18,8 @@ internal class ZNetSceneAwakePatch
 
     private static IEnumerator EnsureAfterHud()
     {
-        while (Hud.instance == null || Hud.instance.m_rootObject == null) yield return null;
+        while (Hud.instance == null || Hud.instance.m_rootObject == null
+               || EnemyHud.instance == null || EnemyHud.instance.m_baseHudPlayer == null) yield return null;
         yield return null;
         ComponentBootstrap.Ensure();
     }
