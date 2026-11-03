@@ -17,7 +17,7 @@ internal static class Constants
     internal static class Plugin
     {
         internal const string ModName = "ServerPlayerList";
-        internal const string ModVersion = "1.3.0";
+        internal const string ModVersion = "1.3.1";
         internal const string Author = "JoksterCube";
         internal const string ModGUID = $"{Author}.{ModName}";
         internal const string Description = "Shows how many players are online, with their names, distances and directions.";
