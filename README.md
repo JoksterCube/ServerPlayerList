@@ -109,5 +109,5 @@ Report issues or suggest improvements via the mod’s Thunderstore page or GitHu
 ---
 
 **Author:** JoksterCube<br>
-**Version:** 1.3.1<br>
+**Version:** 1.3.2<br>
 **License:** [GNU GPL v3 or later](https://www.gnu.org/licenses/gpl-3.0.html)
